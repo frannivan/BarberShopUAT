@@ -4,12 +4,12 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
-import { authInterceptor } from './auth.interceptor';
+import { tenantInterceptor } from './core/interceptors/tenant.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, tenantInterceptor])),
     provideAnimations()
   ]
 };

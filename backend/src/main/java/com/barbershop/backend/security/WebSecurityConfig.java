@@ -62,7 +62,8 @@ public class WebSecurityConfig {
                         "/webjars/**")
                 .permitAll()
                 .antMatchers(org.springframework.http.HttpMethod.GET, "/api/**").permitAll()
-                .antMatchers("/error").permitAll() // Allow internal error dispatch
+                .antMatchers("/error").permitAll()
+                .antMatchers("/").permitAll() // Allow Root/Home for Health Checks
                 .antMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/**").permitAll()
                 .antMatchers(org.springframework.http.HttpMethod.POST, "/api/appointments").permitAll() // Guest booking
                 .anyRequest().authenticated();

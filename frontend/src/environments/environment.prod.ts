@@ -4,6 +4,6 @@ export const environment = {
     // or we can just point to the Render URL here if we know it.
     // Ideally, use a placeholder or read from a config file.
     // For now, let's assume the user will update this or we provide the Render URL.
-    apiUrl: 'https://barbershop-backend.onrender.com/api',
+    apiUrl: 'https://barbershopuat.onrender.com/api',
     tenantId: 'barbershop'
 };

@@ -37,51 +37,50 @@
           "configurations": {
             "production": {
               "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
-              ],
-              "outputHashing": "all"
-            },
-            "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "serve": {
-          "builder": "@angular/build:dev-server",
-          "options": {
-            "host": "0.0.0.0",
-            "allowedHosts": [
-              ".trycloudflare.com",
-              "appbarberia.com"
+                "type": "initial",
+                "maximumWarning": "2MB",
+                "maximumError": "4MB"
+              },
+              {
+                "type": "anyComponentStyle",
+                "maximumWarning": "4kB",
+                "maximumError": "8kB"
+              }
             ],
-            "proxyConfig": "proxy.conf.json"
+            "outputHashing": "all"
           },
-          "configurations": {
-            "production": {
-              "buildTarget": "barbershop-frontend:build:production"
-            },
-            "development": {
-              "buildTarget": "barbershop-frontend:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
+          "development": {
+            "optimization": false,
+            "extractLicenses": false,
+            "sourceMap": true
+          }
         },
-        "test": {
-          "builder": "@angular/build:unit-test"
-        }
+        "defaultConfiguration": "production"
+      },
+      "serve": {
+        "builder": "@angular/build:dev-server",
+        "options": {
+          "host": "0.0.0.0",
+          "allowedHosts": [
+            ".trycloudflare.com",
+            "appbarberia.com"
+          ],
+          "proxyConfig": "proxy.conf.json"
+        },
+        "configurations": {
+          "production": {
+            "buildTarget": "barbershop-frontend:build:production"
+          },
+          "development": {
+            "buildTarget": "barbershop-frontend:build:development"
+          }
+        },
+        "defaultConfiguration": "development"
+      },
+      "test": {
+        "builder": "@angular/build:unit-test"
       }
     }
   }
+}
 }

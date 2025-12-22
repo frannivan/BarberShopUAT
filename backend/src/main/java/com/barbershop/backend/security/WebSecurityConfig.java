@@ -61,8 +61,8 @@ public class WebSecurityConfig {
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**",
                         "/webjars/**")
                 .permitAll()
-                // Public GET endpoints (Demo Mode - Allow all reads)
                 .antMatchers(org.springframework.http.HttpMethod.GET, "/api/**").permitAll()
+                .antMatchers("/error").permitAll() // Allow internal error dispatch
                 .antMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/**").permitAll()
                 .antMatchers(org.springframework.http.HttpMethod.POST, "/api/appointments").permitAll() // Guest booking
                 .anyRequest().authenticated();

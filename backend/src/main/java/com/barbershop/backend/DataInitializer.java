@@ -30,9 +30,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Only initialize if DB is empty
-        if (userRepository.count() == 0) {
-            System.out.println("Initializing Demo Data...");
+        System.out.println("DataInitializer: Checking if seeding is needed...");
+
+        if (!userRepository.existsByEmail("admin@barbershop.com")) {
+            System.out.println("DataInitializer: No admin found. Seeding Demo Data...");
 
             // 1. Users
             User admin = createUser("Admin", "admin@barbershop.com", "ADMIN");
@@ -51,7 +52,9 @@ public class DataInitializer implements CommandLineRunner {
             createType("Afeitado Premium", 20.00, 30, "#FFC107");
             createType("Tinte de Cabello", 35.00, 60, "#9C27B0");
 
-            System.out.println("Demo Data Initialized!");
+            System.out.println("DataInitializer: Demo Data Initialized Successfully!");
+        } else {
+            System.out.println("DataInitializer: Data already exists. Skipping.");
         }
     }
 

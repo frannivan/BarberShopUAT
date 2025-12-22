@@ -1,0 +1,53 @@
+<div class="register-container">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Register</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <form *ngIf="!isSuccessful" (ngSubmit)="onSubmit()" #f="ngForm" novalidate>
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput type="text" name="name" [(ngModel)]="form.name" required minlength="3"
+                        #name="ngModel">
+                    <mat-error *ngIf="name.errors?.['required']">Name is required</mat-error>
+                    <mat-error *ngIf="name.errors?.['minlength']">Name must be at least 3 characters</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput type="email" name="email" [(ngModel)]="form.email" required email #email="ngModel">
+                    <mat-error *ngIf="email.errors?.['required']">Email is required</mat-error>
+                    <mat-error *ngIf="email.errors?.['email']">Email must be a valid email address</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" name="password" [(ngModel)]="form.password" required minlength="6"
+                        #password="ngModel">
+                    <mat-error *ngIf="password.errors?.['required']">Password is required</mat-error>
+                    <mat-error *ngIf="password.errors?.['minlength']">Password must be at least 6 characters</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Role</mat-label>
+                    <mat-select name="role" [(ngModel)]="form.role">
+                        <mat-option value="user">User</mat-option>
+                        <mat-option value="admin">Admin</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="form-group">
+                    <button mat-raised-button color="primary" type="submit">Register</button>
+                </div>
+
+                <div class="alert alert-danger" *ngIf="f.submitted && isSignUpFailed">
+                    Signup failed: {{ errorMessage }}
+                </div>
+            </form>
+
+            <div class="alert alert-success" *ngIf="isSuccessful">
+                Your registration is successful!
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

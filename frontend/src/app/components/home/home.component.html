@@ -1,0 +1,32 @@
+<div class="home-container">
+    <header class="hero">
+        <p class="hero-subtitle-small">Reserva tu cita sin esfuerzo</p>
+        <h1>
+            <span class="highlight">Premium Cuts</span>
+            Tu barbería de confianza
+        </h1>
+        <p class="hero-subtitle">Selecciona tu barbero favorito y agenda tu cita en segundos</p>
+    </header>
+
+    <h2 class="section-title">Nuestros Barberos</h2>
+
+    <div *ngIf="loading" class="loading-spinner">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando barberos...</p>
+    </div>
+
+    <div class="barber-list" *ngIf="!loading">
+        <mat-card class="barber-card" *ngFor="let barber of barbers">
+            <img mat-card-image [src]="barber.photoUrl" alt="{{ barber.name }}" [routerLink]="['/book', barber.id]">
+            <mat-card-content>
+                <mat-card-title>{{ barber.name }}</mat-card-title>
+                <mat-card-subtitle>Master Barber</mat-card-subtitle>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button color="primary" [routerLink]="['/book', barber.id]">
+                    Reservar Ahora
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

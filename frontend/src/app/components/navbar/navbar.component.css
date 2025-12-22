@@ -1,0 +1,90 @@
+/* Navbar styles - Red/Orange Theme */
+nav,
+.mat-toolbar {
+    background: rgba(26, 26, 26, 0.98) !important;
+    border-bottom: 1px solid rgba(231, 76, 60, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.logo-icon {
+    font-size: 28px;
+    color: #e74c3c;
+}
+
+.logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #e74c3c;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-buttons button {
+    color: #ffffff !important;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-buttons button:hover {
+    background: rgba(231, 76, 60, 0.15) !important;
+    color: #e74c3c !important;
+}
+
+.nav-buttons button.active {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .mat-toolbar {
+        flex-wrap: wrap;
+        height: auto !important;
+        padding: 10px 16px;
+    }
+
+    .spacer {
+        display: none;
+    }
+
+    .logo {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+
+    .logo-text {
+        font-size: 1.2rem;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .nav-buttons button {
+        padding: 0 8px !important;
+        font-size: 0.85rem;
+    }
+}

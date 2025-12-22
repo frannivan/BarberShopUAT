@@ -1,0 +1,22 @@
+{
+    "sourceFile": "src/app/components/navbar/navbar.component.html",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1765149673510,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1765149710707,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,7 +8,8 @@\n         <button mat-button routerLink=\"/home\">Inicio</button>\n         <button mat-button routerLink=\"/booking\" *ngIf=\"isLoggedIn()\">Ver Citas</button>\n         <button mat-button routerLink=\"/my-appointments\" *ngIf=\"isLoggedIn()\">Mis Citas</button>\n         <button mat-button routerLink=\"/user-management\" *ngIf=\"isAdmin()\">Usuarios</button>\n+        <button mat-button routerLink=\"/login\" *ngIf=\"!isLoggedIn()\">Login Admin</button>\n         <button mat-button (click)=\"logout()\" *ngIf=\"isLoggedIn()\">Salir</button>\n     </div>\n </mat-toolbar>\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1765149673510,
+            "name": "Commit-0",
+            "content": "<mat-toolbar>\n    <a class=\"logo\" routerLink=\"/home\">\n        <span class=\"logo-icon\">✂</span>\n        <span class=\"logo-text\">Premium Cuts</span>\n    </a>\n    <span class=\"spacer\"></span>\n    <div class=\"nav-buttons\">\n        <button mat-button routerLink=\"/home\">Inicio</button>\n        <button mat-button routerLink=\"/booking\" *ngIf=\"isLoggedIn()\">Ver Citas</button>\n        <button mat-button routerLink=\"/my-appointments\" *ngIf=\"isLoggedIn()\">Mis Citas</button>\n        <button mat-button routerLink=\"/user-management\" *ngIf=\"isAdmin()\">Usuarios</button>\n        <button mat-button (click)=\"logout()\" *ngIf=\"isLoggedIn()\">Salir</button>\n    </div>\n</mat-toolbar>"
+        }
+    ]
+}

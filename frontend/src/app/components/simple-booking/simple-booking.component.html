@@ -1,0 +1,157 @@
+<div class="simple-booking-container">
+    <!-- Header with barber info -->
+    <div class="barber-header" *ngIf="loadingBarber">
+        <div class="barber-photo-placeholder"></div>
+        <div class="barber-info">
+            <h2>Loading barber...</h2>
+            <p class="subtitle">Please wait</p>
+        </div>
+    </div>
+    <div class="barber-header" *ngIf="!loadingBarber && barber">
+        <img [src]="barber.photoUrl" [alt]="barber.name" class="barber-photo">
+        <div class="barber-info">
+            <h2>Book with {{ barber.name }}</h2>
+            <p class="subtitle">Select a date and time for your appointment</p>
+        </div>
+    </div>
+
+    <!-- Step indicators -->
+    <div class="step-indicators" *ngIf="!bookingSuccess">
+        <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+            <span class="step-number">1</span>
+            <span class="step-label">Select Date</span>
+        </div>
+        <div class="step-line" [class.active]="currentStep > 1"></div>
+        <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+            <span class="step-number">2</span>
+            <span class="step-label">Select Time</span>
+        </div>
+        <div class="step-line" [class.active]="currentStep > 2"></div>
+        <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+            <span class="step-number">3</span>
+            <span class="step-label">Your Info</span>
+        </div>
+    </div>
+
+    <!-- Step 1: Date Selection -->
+    <mat-card class="step-card" *ngIf="currentStep === 1">
+        <mat-card-header>
+            <mat-card-title>Choose a Date</mat-card-title>
+            <mat-card-subtitle>Select the day you'd like to visit</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <!-- Service Type Selection -->
+            <mat-form-field appearance="fill" class="full-width" style="margin-bottom: 20px;">
+                <mat-label>Select Service *</mat-label>
+                <mat-select [(ngModel)]="selectedTypeId" [disabled]="loadingTypes">
+                    <mat-option *ngFor="let type of serviceTypes" [value]="type.id">
+                        {{ type.name }} (${{ type.price }})
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div *ngIf="loadingTypes" class="loading-slots">
+                <mat-spinner diameter="20"></mat-spinner> Loading services...
+            </div>
+
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Select Date</mat-label>
+                <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" [min]="minDate" [max]="maxDate"
+                    [matDatepickerFilter]="dateFilter" (dateChange)="onDateChange()" readonly>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker panelClass="my-datepicker-panel"></mat-datepicker>
+            </mat-form-field>
+
+            <div *ngIf="loadingSlots" class="loading-slots">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading available times...</p>
+            </div>
+
+            <div *ngIf="selectedDate && !loadingSlots && availableSlots.length === 0" class="no-slots">
+                <mat-icon>event_busy</mat-icon>
+                <p>No available slots for this date. Please select another day.</p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Step 2: Time Selection -->
+    <mat-card class="step-card" *ngIf="currentStep === 2">
+        <mat-card-header>
+            <mat-card-title>Choose a Time</mat-card-title>
+            <mat-card-subtitle>{{ selectedDate | date:'fullDate' }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="time-slots">
+                <div class="slot-option" *ngFor="let slot of availableSlots" [class.selected]="selectedSlot === slot"
+                    (click)="selectSlot(slot)">
+                    <mat-icon>schedule</mat-icon>
+                    <span class="slot-time">{{ formatSlotTime(slot) }}</span>
+                </div>
+            </div>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-button (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <button mat-raised-button color="primary" [disabled]="!selectedSlot" (click)="continueToForm()">
+                Continue <mat-icon>arrow_forward</mat-icon>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <!-- Step 3: Guest Info -->
+    <mat-card class="step-card" *ngIf="currentStep === 3">
+        <mat-card-header>
+            <mat-card-title>Your Information</mat-card-title>
+            <mat-card-subtitle>
+                {{ selectedDate | date:'fullDate' }} at {{ formatSlotTime(selectedSlot) }}
+            </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Your Name *</mat-label>
+                <input matInput [(ngModel)]="guestName" placeholder="Enter your full name">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Your Email *</mat-label>
+                <input matInput type="email" [(ngModel)]="guestEmail" placeholder="Enter your email">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Your Phone (optional)</mat-label>
+                <input matInput type="tel" [(ngModel)]="guestPhone" placeholder="Enter your phone number">
+            </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-button (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <button mat-raised-button color="primary" [disabled]="!guestName || !guestEmail || isBooking"
+                (click)="submitBooking()">
+                <mat-spinner *ngIf="isBooking" diameter="20"></mat-spinner>
+                <span *ngIf="!isBooking">Book Appointment</span>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <!-- Step 4: Success -->
+    <mat-card class="step-card success-card" *ngIf="bookingSuccess">
+        <mat-card-content>
+            <div class="success-content">
+                <mat-icon class="success-icon">check_circle</mat-icon>
+                <h2>Appointment Confirmed!</h2>
+                <p class="success-details">
+                    <strong>{{ barber?.name }}</strong><br>
+                    {{ formatSlotDate(selectedSlot) }}<br>
+                    {{ formatSlotTime(selectedSlot) }}
+                </p>
+                <p class="confirmation-note">
+                    A confirmation email has been sent to {{ guestEmail }}
+                </p>
+                <button mat-raised-button color="primary" (click)="goHome()">
+                    <mat-icon>home</mat-icon> Back to Home
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

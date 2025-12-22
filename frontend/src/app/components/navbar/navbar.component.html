@@ -1,0 +1,15 @@
+<mat-toolbar>
+    <a class="logo" routerLink="/home">
+        <span class="logo-icon">✂</span>
+        <span class="logo-text">Premium Cuts</span>
+    </a>
+    <span class="spacer"></span>
+    <div class="nav-buttons">
+        <button mat-button routerLink="/home">Inicio</button>
+        <button mat-button routerLink="/booking" *ngIf="isLoggedIn()">Ver Citas</button>
+        <button mat-button routerLink="/my-appointments" *ngIf="isLoggedIn()">Mis Citas</button>
+        <button mat-button routerLink="/user-management" *ngIf="isAdmin()">Usuarios</button>
+        <button mat-button routerLink="/login" *ngIf="!isLoggedIn()">Login Admin</button>
+        <button mat-button (click)="logout()" *ngIf="isLoggedIn()">Salir</button>
+    </div>
+</mat-toolbar>

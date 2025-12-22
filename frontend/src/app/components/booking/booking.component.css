@@ -1,0 +1,245 @@
+.booking-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    text-align: center;
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.barber-select {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
+.barber-select mat-form-field {
+    min-width: 250px;
+}
+
+/* Color indicators in the picklist */
+.barber-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.color-indicator.all-barbers {
+    background: linear-gradient(135deg, #667eea 0%, #f56565 50%, #48bb78 100%);
+}
+
+.select-barber-message {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2em;
+    color: #666;
+}
+
+.instruction-text {
+    text-align: center;
+    margin-bottom: 10px;
+    font-style: italic;
+    color: #555;
+}
+
+.login-hint {
+    text-align: center;
+    color: #1976d2;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+}
+
+.guest-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.guest-form-card {
+    width: 400px;
+    max-width: 90%;
+    padding: 20px;
+    background: white !important;
+}
+
+
+.selected-time {
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 20px;
+}
+
+.full-width {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+mat-card-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Botones de acción - mejor contraste */
+mat-card-actions button[mat-button] {
+    background-color: #6c757d !important;
+    color: white !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+mat-card-actions button[mat-button]:hover {
+    background-color: #5a6268 !important;
+}
+
+mat-card-actions button[mat-raised-button][color="primary"] {
+    background-color: #667eea !important;
+    color: white !important;
+}
+
+mat-card-actions button[mat-raised-button][color="primary"]:hover {
+    background-color: #5568d3 !important;
+}
+
+mat-card-actions button[mat-raised-button][color="warn"] {
+    background-color: #f56565 !important;
+    color: white !important;
+}
+
+mat-card-actions button[mat-raised-button][color="warn"]:hover {
+    background-color: #e53e3e !important;
+}
+
+/* Appointment Detail Modal */
+.appointment-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.appointment-detail-card {
+    width: 450px;
+    max-width: 95%;
+    padding: 20px;
+    background: white !important;
+    border-radius: 12px;
+}
+
+.appointment-detail-card mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #667eea;
+}
+
+.appointment-detail-card mat-card-title mat-icon {
+    color: #667eea;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+}
+
+.detail-value {
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    background: #e0e0e0;
+    color: #666;
+}
+
+.status-badge.status-booked {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+.edit-note {
+    font-size: 0.85em;
+    color: #888;
+    font-style: italic;
+    margin-top: 10px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.4rem;
+    }
+
+    /* FullCalendar Mobile Overrides */
+    ::ng-deep .fc-toolbar-title {
+        font-size: 1.2rem !important;
+    }
+
+    ::ng-deep .fc-button {
+        padding: 4px 8px !important;
+        font-size: 0.85em !important;
+    }
+
+    ::ng-deep .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+
+    ::ng-deep .fc-toolbar {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

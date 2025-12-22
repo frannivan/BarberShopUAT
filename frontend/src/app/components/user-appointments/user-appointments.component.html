@@ -1,0 +1,27 @@
+<div class="appointments-container">
+    <h2>My Appointments</h2>
+
+    <div *ngIf="loading" class="loading-spinner">
+        <p>Loading appointments...</p>
+    </div>
+
+    <div *ngIf="!loading && appointments.length === 0" class="no-appointments">
+        <p>You have no booked appointments.</p>
+    </div>
+
+    <div class="appointments-list" *ngIf="!loading && appointments.length > 0">
+        <mat-card *ngFor="let appointment of appointments" class="appointment-card">
+            <mat-card-header>
+                <mat-card-title>Appointment with {{ appointment.barber?.name || 'Unknown Barber' }}</mat-card-title>
+                <mat-card-subtitle>{{ appointment.startTime | date:'medium' }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <p>Status: {{ appointment.status }}</p>
+                <p>Duration: 1 hour</p>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-button color="warn" (click)="cancelAppointment(appointment.id)">Cancel Appointment</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

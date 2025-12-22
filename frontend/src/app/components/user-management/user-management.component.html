@@ -1,0 +1,140 @@
+<div class="user-mgmt-container">
+    <h1>Management Dashboard</h1>
+
+    <mat-tab-group>
+        <mat-tab label="Users">
+            <div class="tab-content">
+                <!-- Create User Form -->
+                <mat-card class="create-user-card">
+                    <mat-card-header>
+                        <mat-card-title>Create New User</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="form-grid">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Full Name</mat-label>
+                                <input matInput [(ngModel)]="newUser.name" placeholder="John Doe">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Email</mat-label>
+                                <input matInput [(ngModel)]="newUser.email" placeholder="email@example.com"
+                                    type="email">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Password</mat-label>
+                                <input matInput [(ngModel)]="newUser.password" type="password">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Role</mat-label>
+                                <mat-select [(ngModel)]="newUser.role">
+                                    <mat-option value="BARBER">Barber</mat-option>
+                                    <mat-option value="ADMIN">Admin</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </mat-card-content>
+                    <mat-card-actions align="end">
+                        <button mat-raised-button color="primary" (click)="createUser()">
+                            <mat-icon>person_add</mat-icon>Create User
+                        </button>
+                    </mat-card-actions>
+                </mat-card>
+
+                <!-- Users List -->
+                <div class="mat-elevation-z8 list-container">
+                    <table mat-table [dataSource]="(users$ | async) || []">
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef> Name </th>
+                            <td mat-cell *matCellDef="let user"> {{user.name}} </td>
+                        </ng-container>
+
+                        <!-- Email Column -->
+                        <ng-container matColumnDef="email">
+                            <th mat-header-cell *matHeaderCellDef> Email </th>
+                            <td mat-cell *matCellDef="let user"> {{user.email}} </td>
+                        </ng-container>
+
+                        <!-- Role Column -->
+                        <ng-container matColumnDef="role">
+                            <th mat-header-cell *matHeaderCellDef> Role </th>
+                            <td mat-cell *matCellDef="let user">
+                                <span class="role-badge" [class.admin]="user.role === 'ADMIN'"
+                                    [class.barber]="user.role === 'BARBER'">
+                                    {{user.role}}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Actions Column -->
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef> Actions </th>
+                            <td mat-cell *matCellDef="let user">
+                                <button mat-icon-button color="warn" (click)="deleteUser(user.id)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                </div>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Barbers Status">
+            <div class="tab-content">
+                <mat-card class="info-card">
+                    <mat-card-content>
+                        <p>Manage which barbers are visible to customers for booking.</p>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="mat-elevation-z8 list-container">
+                    <table mat-table [dataSource]="(barbers$ | async) || []">
+                        <!-- Photo Column -->
+                        <ng-container matColumnDef="photo">
+                            <th mat-header-cell *matHeaderCellDef> Photo </th>
+                            <td mat-cell *matCellDef="let barber">
+                                <img [src]="barber.photoUrl" class="barber-thumb">
+                            </td>
+                        </ng-container>
+
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef> Name </th>
+                            <td mat-cell *matCellDef="let barber"> {{barber.name}} </td>
+                        </ng-container>
+
+                        <!-- Status Column -->
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef> Status </th>
+                            <td mat-cell *matCellDef="let barber">
+                                <span class="active-badge" [class.inactive]="!barber.active">
+                                    {{ barber.active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Actions Column -->
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef> Visible </th>
+                            <td mat-cell *matCellDef="let barber">
+                                <mat-slide-toggle [checked]="barber.active" (change)="toggleBarberStatus(barber)"
+                                    color="primary">
+                                </mat-slide-toggle>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="barberColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: barberColumns;"></tr>
+                    </table>
+                </div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

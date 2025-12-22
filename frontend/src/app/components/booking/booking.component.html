@@ -1,0 +1,200 @@
+<div class="booking-container">
+    <h2 class="page-title">Appointments Viewer</h2>
+    <div class="barber-select">
+        <mat-form-field appearance="fill">
+            <mat-label>Select Barber</mat-label>
+            <mat-select [(ngModel)]="selectedBarberId" (selectionChange)="onBarberChange()">
+                <mat-option [value]="0">
+                    <span class="barber-option">
+                        <span class="color-indicator all-barbers"></span>
+                        All Barbers
+                    </span>
+                </mat-option>
+                <mat-option *ngFor="let barber of barbers" [value]="barber.id">
+                    <span class="barber-option">
+                        <span class="color-indicator" [style.background-color]="getBarberColor(barber.id)"></span>
+                        {{ barber.name }}
+                    </span>
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="accent" routerLink="/booking/list" class="list-view-btn">
+            <mat-icon>list</mat-icon>View List
+        </button>
+    </div>
+
+    <div class="calendar-wrapper" *ngIf="selectedBarberId !== null && !showGuestForm">
+        <p class="instruction-text">Click on any available time slot to book an appointment.</p>
+        <p class="login-hint" *ngIf="!isLoggedIn">You will need to provide your contact info to book.</p>
+        <full-calendar [options]="calendarOptions"></full-calendar>
+    </div>
+
+    <div *ngIf="selectedBarberId === null" class="select-barber-message">
+        <p>Please select a barber to view availability.</p>
+    </div>
+
+    <!-- Guest Booking Form -->
+    <div class="guest-form-overlay" *ngIf="showGuestForm">
+        <mat-card class="guest-form-card">
+            <mat-card-header>
+                <mat-card-title>Complete Your Booking</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <p class="selected-time">Selected time: {{ selectedTime | date:'medium' }}</p>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Your Name *</mat-label>
+                    <input matInput [(ngModel)]="guestName" placeholder="Enter your full name">
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Your Email *</mat-label>
+                    <input matInput type="email" [(ngModel)]="guestEmail" placeholder="Enter your email">
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Your Phone (optional)</mat-label>
+                    <input matInput type="tel" [(ngModel)]="guestPhone" placeholder="Enter your phone number">
+                </mat-form-field>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button color="primary" (click)="submitGuestBooking()">Book Appointment</button>
+                <button mat-button (click)="cancelGuestBooking()">Cancel</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <!-- Appointment Detail Modal -->
+    <div class="appointment-detail-overlay" *ngIf="showAppointmentDetail && selectedAppointment">
+        <mat-card class="appointment-detail-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>{{ isEditMode ? 'edit' : 'event' }}</mat-icon>
+                    {{ isEditMode ? 'Edit Appointment' : 'Appointment Details' }}
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <!-- View Mode -->
+                <ng-container *ngIf="!isEditMode">
+                    <div class="detail-row">
+                        <span class="detail-label">Barber:</span>
+                        <span class="detail-value">
+                            <span class="color-dot" [style.background-color]="selectedAppointment.color"></span>
+                            {{ selectedAppointment.barber?.name || selectedAppointment.title }}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">{{ selectedAppointment.start | date:'fullDate' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Time:</span>
+                        <span class="detail-value">
+                            {{ selectedAppointment.start | date:'shortTime' }} - {{ selectedAppointment.end |
+                            date:'shortTime' }}
+                        </span>
+                    </div>
+                    <div class="detail-row" *ngIf="selectedAppointment.clientName">
+                        <span class="detail-label">Client:</span>
+                        <span class="detail-value">{{ selectedAppointment.clientName }}</span>
+                    </div>
+                    <div class="detail-row" *ngIf="selectedAppointment.clientEmail">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">{{ selectedAppointment.clientEmail }}</span>
+                    </div>
+                    <div class="detail-row" *ngIf="selectedAppointment.clientPhone">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">{{ selectedAppointment.clientPhone }}</span>
+                    </div>
+                    <div class="detail-row" *ngIf="selectedAppointment.extendedProps?.appointmentType">
+                        <span class="detail-label">Type:</span>
+                        <span class="detail-value">
+                            {{ selectedAppointment.extendedProps.appointmentType.name }}
+                            (${{ selectedAppointment.extendedProps.appointmentType.price }})
+                        </span>
+                    </div>
+                    <div class="detail-row" *ngIf="selectedAppointment.extendedProps?.notes">
+                        <span class="detail-label">Notes:</span>
+                        <span class="detail-value">{{ selectedAppointment.extendedProps.notes }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value status-badge"
+                            [class.status-booked]="selectedAppointment.status === 'BOOKED'">
+                            {{ selectedAppointment.status || 'BOOKED' }}
+                        </span>
+                    </div>
+                </ng-container>
+
+                <!-- Edit Mode -->
+                <ng-container *ngIf="isEditMode">
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Barber</mat-label>
+                        <mat-select [(ngModel)]="editBarberId">
+                            <mat-option *ngFor="let barber of barbers" [value]="barber.id">
+                                <span class="barber-option">
+                                    <span class="color-indicator"
+                                        [style.background-color]="getBarberColor(barber.id)"></span>
+                                    {{ barber.name }}
+                                </span>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Date</mat-label>
+                        <input matInput [matDatepicker]="editPicker" [(ngModel)]="editDate">
+                        <mat-datepicker-toggle matIconSuffix [for]="editPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #editPicker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Time</mat-label>
+                        <input matInput type="time" [(ngModel)]="editTime">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Type</mat-label>
+                        <mat-select [(ngModel)]="editTypeId">
+                            <mat-option *ngFor="let type of serviceTypes" [value]="type.id">
+                                {{ type.name }} (${{ type.price }})
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Notes</mat-label>
+                        <textarea matInput [(ngModel)]="editNotes" rows="3"></textarea>
+                    </mat-form-field>
+
+                    <p class="edit-note">Note: Appointments are 1 hour long.</p>
+                </ng-container>
+            </mat-card-content>
+            <mat-card-actions>
+                <!-- View Mode Actions -->
+                <ng-container *ngIf="!isEditMode">
+                    <button mat-button (click)="closeAppointmentDetail()">Close</button>
+                    <button mat-raised-button color="primary" *ngIf="isAdmin" (click)="enterEditMode()">
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                    </button>
+                    <button mat-raised-button color="warn" *ngIf="isAdmin" (click)="deleteAppointment()"
+                        [disabled]="isDeleting">
+                        <mat-icon>delete</mat-icon>
+                        {{ isDeleting ? 'Deleting...' : 'Delete' }}
+                    </button>
+                </ng-container>
+
+                <!-- Edit Mode Actions -->
+                <ng-container *ngIf="isEditMode">
+                    <button mat-button (click)="cancelEdit()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveAppointment()" [disabled]="isSaving">
+                        <mat-icon>save</mat-icon>
+                        {{ isSaving ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                </ng-container>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

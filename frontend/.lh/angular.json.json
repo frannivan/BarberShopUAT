@@ -1,0 +1,26 @@
+{
+    "sourceFile": "angular.json",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1765084638474,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1765084860956,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,10 +16,10 @@\n       \"architect\": {\n         \"build\": {\n           \"builder\": \"@angular/build:application\",\n           \"options\": {\n-            \"disableHostCheck\": true,\n             \"host\": \"0.0.0.0\",\n+            \"allowedHosts\": [\"*\"],\n             \"browser\": \"src/main.ts\",\n             \"tsConfig\": \"tsconfig.app.json\",\n             \"assets\": [\n               {\n@@ -61,8 +61,12 @@\n           \"defaultConfiguration\": \"production\"\n         },\n         \"serve\": {\n           \"builder\": \"@angular/build:dev-server\",\n+          \"options\": {\n+            \"host\": \"0.0.0.0\",\n+            \"allowedHosts\": [\"*\"]\n+          },\n           \"configurations\": {\n             \"production\": {\n               \"buildTarget\": \"barbershop-frontend:build:production\"\n             },\n@@ -77,5 +81,5 @@\n         }\n       }\n     }\n   }\n-}\n\\ No newline at end of file\n+}\n"
+                },
+                {
+                    "date": 1765085168354,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,10 +16,8 @@\n       \"architect\": {\n         \"build\": {\n           \"builder\": \"@angular/build:application\",\n           \"options\": {\n-            \"host\": \"0.0.0.0\",\n-            \"allowedHosts\": [\"*\"],\n             \"browser\": \"src/main.ts\",\n             \"tsConfig\": \"tsconfig.app.json\",\n             \"assets\": [\n               {\n"
+                }
+            ],
+            "date": 1765084638474,
+            "name": "Commit-0",
+            "content": "{\n  \"$schema\": \"./node_modules/@angular/cli/lib/config/schema.json\",\n  \"version\": 1,\n  \"cli\": {\n    \"packageManager\": \"npm\",\n    \"analytics\": false\n  },\n  \"newProjectRoot\": \"projects\",\n  \"projects\": {\n    \"barbershop-frontend\": {\n      \"projectType\": \"application\",\n      \"schematics\": {},\n      \"root\": \"\",\n      \"sourceRoot\": \"src\",\n      \"prefix\": \"app\",\n      \"architect\": {\n        \"build\": {\n          \"builder\": \"@angular/build:application\",\n          \"options\": {\n            \"disableHostCheck\": true,\n            \"host\": \"0.0.0.0\",\n            \"browser\": \"src/main.ts\",\n            \"tsConfig\": \"tsconfig.app.json\",\n            \"assets\": [\n              {\n                \"glob\": \"**/*\",\n                \"input\": \"public\"\n              },\n              {\n                \"glob\": \"**/*\",\n                \"input\": \"src/assets\",\n                \"output\": \"/assets\"\n              }\n            ],\n            \"styles\": [\n              \"src/styles.css\"\n            ]\n          },\n          \"configurations\": {\n            \"production\": {\n              \"budgets\": [\n                {\n                  \"type\": \"initial\",\n                  \"maximumWarning\": \"500kB\",\n                  \"maximumError\": \"1MB\"\n                },\n                {\n                  \"type\": \"anyComponentStyle\",\n                  \"maximumWarning\": \"4kB\",\n                  \"maximumError\": \"8kB\"\n                }\n              ],\n              \"outputHashing\": \"all\"\n            },\n            \"development\": {\n              \"optimization\": false,\n              \"extractLicenses\": false,\n              \"sourceMap\": true\n            }\n          },\n          \"defaultConfiguration\": \"production\"\n        },\n        \"serve\": {\n          \"builder\": \"@angular/build:dev-server\",\n          \"configurations\": {\n            \"production\": {\n              \"buildTarget\": \"barbershop-frontend:build:production\"\n            },\n            \"development\": {\n              \"buildTarget\": \"barbershop-frontend:build:development\"\n            }\n          },\n          \"defaultConfiguration\": \"development\"\n        },\n        \"test\": {\n          \"builder\": \"@angular/build:unit-test\"\n        }\n      }\n    }\n  }\n}"
+        }
+    ]
+}

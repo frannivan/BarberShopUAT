@@ -1,0 +1,136 @@
+<div class="admin-container">
+    <div class="stats-section">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Statistics</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <p>Total Users: {{ stats.users }}</p>
+                <p>Total Appointments: {{ stats.appointments }}</p>
+                <p>Total Barbers: {{ stats.barbers }}</p>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <mat-tab-group>
+        <!-- Appointments Tab -->
+        <mat-tab label="Appointments">
+            <div class="tab-content">
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title>All Appointments</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <mat-list>
+                            <mat-list-item *ngFor="let appointment of appointments">
+                                <span matListItemTitle>
+                                    {{ appointment.startTime | date:'medium' }} - {{ appointment.endTime |
+                                    date:'shortTime' }}
+                                </span>
+                                <span matListItemLine>
+                                    Client: {{ appointment.user?.name || appointment.guestName }} ({{
+                                    appointment.user?.email || appointment.guestEmail }})
+                                </span>
+                                <span matListItemLine>
+                                    Barber: {{ appointment.barber?.name }}
+                                </span>
+                                <span matListItemLine>Status: {{ appointment.status }}</span>
+                                <button mat-icon-button color="warn" (click)="cancelAppointment(appointment.id)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </mat-list-item>
+                            <mat-list-item *ngIf="appointments.length === 0">
+                                <span matListItemTitle>No appointments</span>
+                            </mat-list-item>
+                        </mat-list>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <!-- Barber Management Tab -->
+        <mat-tab label="Manage Barbers">
+            <div class="tab-content">
+                <mat-card class="form-card">
+                    <mat-card-header>
+                        <mat-card-title>Add New Barber</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Name *</mat-label>
+                            <input matInput [(ngModel)]="newBarber.name" placeholder="Barber name">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Email *</mat-label>
+                            <input matInput type="email" [(ngModel)]="newBarber.email" placeholder="Login email">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Password *</mat-label>
+                            <input matInput type="password" [(ngModel)]="newBarber.password"
+                                placeholder="Login password">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Photo URL</mat-label>
+                            <input matInput [(ngModel)]="newBarber.photoUrl" placeholder="Optional photo URL">
+                        </mat-form-field>
+                    </mat-card-content>
+                    <mat-card-actions>
+                        <button mat-raised-button color="primary" (click)="createBarber()">Add Barber</button>
+                    </mat-card-actions>
+                </mat-card>
+
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title>Current Barbers</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <mat-list>
+                            <mat-list-item *ngFor="let barber of barbers">
+                                <span matListItemTitle>{{ barber.name }}</span>
+                                <span matListItemLine *ngIf="barber.user">Login: {{ barber.user.email }}</span>
+                                <span matListItemLine *ngIf="!barber.user">No login account</span>
+                            </mat-list-item>
+                            <mat-list-item *ngIf="barbers.length === 0">
+                                <span matListItemTitle>No barbers registered</span>
+                            </mat-list-item>
+                        </mat-list>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <!-- Admin Management Tab -->
+        <mat-tab label="Manage Admins">
+            <div class="tab-content">
+                <mat-card class="form-card">
+                    <mat-card-header>
+                        <mat-card-title>Add New Admin</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Name *</mat-label>
+                            <input matInput [(ngModel)]="newAdmin.name" placeholder="Admin name">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Email *</mat-label>
+                            <input matInput type="email" [(ngModel)]="newAdmin.email" placeholder="Login email">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Password *</mat-label>
+                            <input matInput type="password" [(ngModel)]="newAdmin.password"
+                                placeholder="Login password">
+                        </mat-form-field>
+                    </mat-card-content>
+                    <mat-card-actions>
+                        <button mat-raised-button color="primary" (click)="createAdmin()">Add Admin</button>
+                    </mat-card-actions>
+                </mat-card>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

@@ -1,0 +1,47 @@
+<div class="barber-dashboard-container">
+    <header class="dashboard-header">
+        <h1>My Appointments</h1>
+        <p>View and manage your scheduled appointments</p>
+    </header>
+
+    <div class="calendar-section">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Weekly Schedule</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <full-calendar [options]="calendarOptions"></full-calendar>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <div class="appointments-list">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Upcoming Appointments</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <mat-list>
+                    <mat-list-item *ngFor="let appointment of appointments">
+                        <span matListItemTitle>
+                            {{ appointment.startTime | date:'medium' }} - {{ appointment.endTime | date:'shortTime' }}
+                        </span>
+                        <span matListItemLine>
+                            Client: {{ appointment.user?.name || appointment.guestName }}
+                        </span>
+                        <span matListItemLine>
+                            Email: {{ appointment.user?.email || appointment.guestEmail }}
+                        </span>
+                        <span matListItemLine *ngIf="appointment.guestPhone">
+                            Phone: {{ appointment.guestPhone }}
+                        </span>
+                        <span matListItemLine>Status: {{ appointment.status }}</span>
+                    </mat-list-item>
+                    <mat-list-item *ngIf="appointments.length === 0">
+                        <span matListItemTitle>No appointments scheduled</span>
+                    </mat-list-item>
+                </mat-list>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+.admin-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stats-section {
+    margin-bottom: 20px;
+}
+
+.stats-section mat-card {
+    padding: 20px;
+}
+
+.stats-section mat-card-content {
+    display: flex;
+    gap: 30px;
+}
+
+.stats-section p {
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.tab-content {
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-card {
+    margin-bottom: 20px;
+}
+
+.full-width {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+mat-card-actions {
+    padding: 16px;
+}
+
+mat-list-item {
+    border-bottom: 1px solid #eee;
+}

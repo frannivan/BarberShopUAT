@@ -1,0 +1,140 @@
+.user-mgmt-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    margin-bottom: 24px;
+    color: #e74c3c;
+    font-size: 2rem;
+}
+
+/* Tabs */
+.tab-content {
+    padding-top: 20px;
+}
+
+::ng-deep .mat-tab-label,
+::ng-deep .mat-tab-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+::ng-deep .mat-tab-label-active {
+    color: white !important;
+}
+
+/* Form Styles */
+.create-user-card,
+.info-card {
+    margin-bottom: 30px;
+    background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-card {
+    background: #2a2a2a;
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+mat-card-title {
+    color: #ffffff;
+}
+
+button {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Table Styles */
+.list-container {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+}
+
+th.mat-header-cell {
+    background: #1a1a1a;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+td.mat-cell {
+    color: #f0f0f0;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+tr.mat-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Role & Status Badges */
+.role-badge,
+.active-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    color: #b0b0b0;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+}
+
+.role-badge.admin {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.role-badge.barber {
+    background: rgba(230, 126, 34, 0.2);
+    color: #e67e22;
+}
+
+.active-badge {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.active-badge.inactive {
+    background: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+}
+
+/* Barber Thumb */
+.barber-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+/* SnackBar Styles */
+::ng-deep .success-snack {
+    background-color: #27ae60 !important;
+    color: white !important;
+}
+
+::ng-deep .error-snack {
+    background-color: #c0392b !important;
+    color: white !important;
+}
+
+::ng-deep .warning-snack {
+    background-color: #f39c12 !important;
+    color: white !important;
+}

@@ -1,0 +1,456 @@
+/* Angular Material Theme */
+@import "@angular/material/prebuilt-themes/indigo-pink.css";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:wght@400;700&display=swap');
+
+/* ===== BARBERSHOP THEME - RED/ORANGE STYLE ===== */
+:root {
+    /* Color Palette - Red/Orange Theme */
+    --primary-dark: #1a1a1a;
+    --secondary-dark: #2a2a2a;
+    --accent-red: #e74c3c;
+    --accent-orange: #e67e22;
+    --text-white: #ffffff;
+    --text-light: #f0f0f0;
+    --text-gray: #b0b0b0;
+    --border-subtle: rgba(255, 255, 255, 0.15);
+
+    /* Gradients */
+    --gradient-red: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    --gradient-orange: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+}
+
+/* Global Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--primary-dark);
+    color: var(--text-white);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: var(--text-white);
+}
+
+/* Links */
+a {
+    color: var(--accent-red);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-orange);
+}
+
+/* ===== MATERIAL COMPONENT OVERRIDES ===== */
+
+/* Cards */
+.mat-mdc-card {
+    background: var(--secondary-dark) !important;
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+    color: var(--text-white) !important;
+}
+
+/* Buttons - Primary */
+/* Buttons - Primary */
+.mat-mdc-raised-button.mat-primary {
+    background: var(--gradient-red) !important;
+    color: var(--text-white) !important;
+    font-weight: 700 !important;
+    border-radius: 25px !important;
+    padding: 0 24px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    /* Flex layout for icon+text */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    white-space: nowrap !important;
+    /* Prevent text wrapping */
+}
+
+.mat-mdc-raised-button.mat-primary .mat-icon {
+    margin-right: 0 !important;
+    /* Reset default margins since we used gap */
+}
+
+/* Icon Buttons (Edit/Delete) - High Visibility */
+.mat-mdc-icon-button {
+    background: rgba(255, 255, 255, 0.18) !important;
+    /* Increased visibility */
+    border-radius: 8px !important;
+    margin: 0 4px !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mat-mdc-icon-button.mat-primary {
+    color: var(--accent-orange) !important;
+    border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+
+.mat-mdc-icon-button.mat-primary .mat-icon {
+    color: var(--accent-orange) !important;
+}
+
+.mat-mdc-icon-button.mat-warn {
+    color: var(--accent-red) !important;
+    border: 1px solid rgba(231, 76, 60, 0.3) !important;
+}
+
+.mat-mdc-icon-button.mat-warn .mat-icon {
+    color: var(--accent-red) !important;
+}
+
+.mat-mdc-icon-button:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px);
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4) !important;
+}
+
+.mat-mdc-button {
+    color: var(--text-white) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    white-space: nowrap !important;
+}
+
+.mat-mdc-button:hover {
+    background: rgba(231, 76, 60, 0.1) !important;
+}
+
+/* Form Fields */
+.mat-mdc-form-field {
+    width: 100%;
+}
+
+.mdc-text-field--filled {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    color: var(--text-white) !important;
+}
+
+.mat-mdc-form-field-focus-overlay {
+    background: rgba(231, 76, 60, 0.1) !important;
+}
+
+.mdc-floating-label {
+    color: var(--text-gray) !important;
+}
+
+.mdc-line-ripple::before {
+    border-bottom-color: var(--border-subtle) !important;
+}
+
+.mdc-line-ripple--active::after {
+    border-bottom-color: var(--accent-red) !important;
+}
+
+/* Select dropdown */
+.mat-mdc-select-value {
+    color: var(--text-white) !important;
+}
+
+.mat-mdc-option {
+    background: var(--secondary-dark) !important;
+    color: var(--text-white) !important;
+}
+
+.mat-mdc-option:hover {
+    background: rgba(231, 76, 60, 0.15) !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected {
+    background: rgba(231, 76, 60, 0.25) !important;
+}
+
+/* Select Panel */
+.mat-mdc-select-panel {
+    background: var(--secondary-dark) !important;
+    border: 1px solid var(--border-subtle);
+}
+
+/* Datepicker */
+.mat-datepicker-content {
+    background: var(--secondary-dark) !important;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px !important;
+}
+
+.mat-calendar {
+    background: var(--secondary-dark) !important;
+}
+
+.mat-calendar-body-cell-content {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-white) !important;
+    border-radius: 8px !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mat-calendar-body-cell-content:hover {
+    background: rgba(231, 76, 60, 0.25) !important;
+}
+
+.mat-calendar-body-selected {
+    background: var(--accent-red) !important;
+    color: var(--text-white) !important;
+}
+
+.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+    border-color: var(--accent-red) !important;
+}
+
+.mat-calendar-header {
+    background: var(--primary-dark) !important;
+    padding: 12px !important;
+}
+
+.mat-calendar-controls button {
+    color: var(--text-white) !important;
+}
+
+.mat-calendar-table-header th {
+    color: var(--text-gray) !important;
+}
+
+/* Card Elements */
+mat-card-title {
+    color: var(--text-white) !important;
+}
+
+mat-card-subtitle {
+    color: var(--accent-red) !important;
+}
+
+/* Toolbar */
+.mat-toolbar {
+    background: rgba(26, 26, 26, 0.95) !important;
+    color: var(--text-white) !important;
+}
+
+/* Overlay styling */
+.cdk-overlay-pane {
+    max-width: 95vw !important;
+}
+
+.cdk-overlay-container .mat-datepicker-content {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-red);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-orange);
+}
+
+/* Selection */
+::selection {
+    background: var(--accent-red);
+    color: var(--text-white);
+}
+
+/* Spinner */
+.mat-mdc-progress-spinner circle {
+    stroke: var(--accent-red) !important;
+}
+
+/* ===== FULLCALENDAR DARK THEME ===== */
+.fc {
+    --fc-border-color: var(--border-subtle);
+    --fc-button-bg-color: var(--accent-red);
+    --fc-button-border-color: var(--accent-red);
+    --fc-button-text-color: var(--text-white);
+    --fc-button-hover-bg-color: #c0392b;
+    --fc-button-hover-border-color: #c0392b;
+    --fc-button-active-bg-color: #c0392b;
+    --fc-event-bg-color: var(--accent-red);
+    --fc-event-border-color: var(--accent-red);
+    --fc-today-bg-color: rgba(231, 76, 60, 0.1);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: var(--secondary-dark);
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border-color: var(--border-subtle) !important;
+}
+
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number,
+.fc-timegrid-slot-label-cushion {
+    color: var(--text-white) !important;
+}
+
+.fc-scrollgrid {
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--secondary-dark);
+}
+
+.fc-button {
+    font-weight: 600 !important;
+    border-radius: 20px !important;
+    padding: 8px 16px !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Utility Classes */
+.text-red {
+    color: var(--accent-red) !important;
+}
+
+.text-orange {
+    color: var(--accent-orange) !important;
+}
+
+.text-white {
+    color: var(--text-white) !important;
+}
+
+.text-gray {
+    color: var(--text-gray) !important;
+}
+
+.bg-dark {
+    background: var(--primary-dark) !important;
+}
+
+/* ===== MOBILE OVERRIDES (Global) ===== */
+@media (max-width: 768px) {
+
+    /* Responsive Titles */
+    h1,
+    .page-title,
+    mat-card-title {
+        font-size: 1.4rem !important;
+        line-height: 1.2;
+    }
+
+    /* FullCalendar Mobile Adjustments */
+    .fc-toolbar-title {
+        font-size: 1.2rem !important;
+    }
+
+    .fc-button {
+        padding: 4px 10px !important;
+        font-size: 0.8em !important;
+        margin-bottom: 4px;
+    }
+
+    .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    .fc-toolbar {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+/* Tab Contrast Fixes (Force legibility on dark theme) */
+.mat-mdc-tab-labels {
+    background-color: transparent;
+}
+
+/* Base tab link/label */
+.mat-mdc-tab-link,
+.mat-mdc-tab-label,
+.mdc-tab,
+.mdc-tab__text-label {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Active tab state */
+.mat-mdc-tab-label.mdc-tab--active,
+.mat-mdc-tab-link.mdc-tab--active,
+.mdc-tab--active .mdc-tab__text-label {
+    color: var(--text-white) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-bottom: 2px solid var(--accent-red) !important;
+    /* Brand highlight */
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.mat-mdc-tab-header-pagination-chevron {
+    color: var(--text-white) !important;
+}

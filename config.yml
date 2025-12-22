@@ -1,0 +1,7 @@
+tunnel: 59239903-d016-4d14-8fbf-861c1662114a
+credentials-file: /Users/franivan/.cloudflared/59239903-d016-4d14-8fbf-861c1662114a.json
+
+ingress:
+  - hostname: appbarberia.com
+    service: http://localhost:4200
+  - service: http_status:404

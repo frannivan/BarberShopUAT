@@ -1,0 +1,16 @@
+.appointments-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.loading-spinner,
+.no-appointments {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.appointment-card {
+    margin-bottom: 15px;
+}

@@ -54,6 +54,10 @@ public class WebSecurityConfig {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
+                // Prioritize Public Access
+                .antMatchers("/", "/index.html", "/css/**", "/js/**").permitAll()
+                .antMatchers(org.springframework.http.HttpMethod.HEAD, "/**").permitAll()
+
                 .antMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow pre-flight
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/auth/**").permitAll()

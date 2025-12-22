@@ -76,7 +76,7 @@ public class DataInitializer implements CommandLineRunner {
     private void createType(String name, double price, int duration, String color) {
         AppointmentType type = new AppointmentType();
         type.setName(name);
-        type.setPrice(BigDecimal.valueOf(price));
+        type.setPrice(price);
         type.setDurationMinutes(duration);
         type.setColor(color);
         appointmentTypeRepository.save(type);

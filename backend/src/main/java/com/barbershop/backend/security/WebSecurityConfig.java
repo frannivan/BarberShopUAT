@@ -61,11 +61,10 @@ public class WebSecurityConfig {
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**",
                         "/webjars/**")
                 .permitAll()
-                .antMatchers("/api/barbers/**").permitAll()
-                .antMatchers("/api/appointments/barber/**").permitAll()
-                .antMatchers("/api/appointments/available-slots").permitAll()
-                .antMatchers(org.springframework.http.HttpMethod.GET, "/api/appointment-types").permitAll()
-                .antMatchers(org.springframework.http.HttpMethod.POST, "/api/appointments").permitAll()
+                // Public GET endpoints (Demo Mode - Allow all reads)
+                .antMatchers(org.springframework.http.HttpMethod.GET, "/api/**").permitAll()
+                .antMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/**").permitAll()
+                .antMatchers(org.springframework.http.HttpMethod.POST, "/api/appointments").permitAll() // Guest booking
                 .anyRequest().authenticated();
 
         http.headers().frameOptions().disable(); // ← agregar esto

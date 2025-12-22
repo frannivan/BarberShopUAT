@@ -3,7 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StorageService } from './storage.service';
 
-const API_URL = '/api/admin/';
+import { environment } from '../../environments/environment';
+
+const API_URL = `${environment.apiUrl}/admin/`;
 
 @Injectable({
     providedIn: 'root'

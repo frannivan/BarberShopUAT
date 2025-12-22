@@ -37,50 +37,51 @@
           "configurations": {
             "production": {
               "budgets": [
-                "type": "initial",
-                "maximumWarning": "2MB",
-                "maximumError": "4MB"
-              },
-              {
-                "type": "anyComponentStyle",
-                "maximumWarning": "4kB",
-                "maximumError": "8kB"
-              }
+                {
+                  "type": "initial",
+                  "maximumWarning": "2MB",
+                  "maximumError": "4MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "host": "0.0.0.0",
+            "allowedHosts": [
+              ".trycloudflare.com",
+              "appbarberia.com"
             ],
-            "outputHashing": "all"
+            "proxyConfig": "proxy.conf.json"
           },
-          "development": {
-            "optimization": false,
-            "extractLicenses": false,
-            "sourceMap": true
-          }
-        },
-        "defaultConfiguration": "production"
-      },
-      "serve": {
-        "builder": "@angular/build:dev-server",
-        "options": {
-          "host": "0.0.0.0",
-          "allowedHosts": [
-            ".trycloudflare.com",
-            "appbarberia.com"
-          ],
-          "proxyConfig": "proxy.conf.json"
-        },
-        "configurations": {
-          "production": {
-            "buildTarget": "barbershop-frontend:build:production"
+          "configurations": {
+            "production": {
+              "buildTarget": "barbershop-frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "barbershop-frontend:build:development"
+            }
           },
-          "development": {
-            "buildTarget": "barbershop-frontend:build:development"
-          }
+          "defaultConfiguration": "development"
         },
-        "defaultConfiguration": "development"
-      },
-      "test": {
-        "builder": "@angular/build:unit-test"
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
       }
     }
   }
-}
 }

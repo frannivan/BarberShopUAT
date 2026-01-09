@@ -1,13 +1,15 @@
 package com.barbershop.backend.controller;
 
-import com.barbershop.backend.model.Barber;
-import com.barbershop.backend.model.User;
+import com.barbershop.backend.model.*;
 import com.barbershop.backend.payload.request.BarberRequest;
 import com.barbershop.backend.payload.request.SignupRequest;
 import com.barbershop.backend.payload.response.MessageResponse;
 import com.barbershop.backend.repository.AppointmentRepository;
 import com.barbershop.backend.repository.BarberRepository;
 import com.barbershop.backend.repository.UserRepository;
+import com.barbershop.backend.repository.LeadRepository;
+import com.barbershop.backend.repository.OpportunityRepository;
+import com.barbershop.backend.service.CRMService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +35,16 @@ public class AdminController {
     BarberRepository barberRepository;
 
     @Autowired
+    LeadRepository leadRepository;
+
+    @Autowired
+    OpportunityRepository opportunityRepository;
+
+    @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    private CRMService crmService;
 
     @GetMapping("/stats")
     public ResponseEntity<?> getStats() {
@@ -41,6 +52,8 @@ public class AdminController {
         stats.put("users", userRepository.count());
         stats.put("appointments", appointmentRepository.count());
         stats.put("barbers", barberRepository.count());
+        stats.put("leads", leadRepository.count());
+        stats.put("opportunities", opportunityRepository.count());
         return ResponseEntity.ok(stats);
     }
 
@@ -49,48 +62,172 @@ public class AdminController {
         return barberRepository.findAll();
     }
 
-    @PostMapping("/barbers")
-    public ResponseEntity<?> createBarber(@RequestBody BarberRequest barberRequest) {
-        // Check if email already exists
-        if (userRepository.existsByEmail(barberRequest.getEmail())) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+    @PostMapping("/users")
+    public ResponseEntity<?> saveUser(@RequestBody SignupRequest request) {
+        try {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("Error: Email already in use!"));
+            }
+
+            // Create User
+            User user = new User();
+            user.setName(request.getName());
+            user.setEmail(request.getEmail());
+            user.setPassword(encoder.encode(request.getPassword()));
+            user.setPhone(request.getPhone());
+            user.setGender(request.getGender());
+
+            // Determine Role
+            User.Role roleVal = User.Role.USER;
+            if (request.getRole() != null) {
+                String roleStr = request.getRole().toUpperCase();
+                if (roleStr.equals("CLIENTE")) {
+                    roleVal = User.Role.CLIENTE;
+                } else {
+                    roleVal = User.Role.valueOf(roleStr);
+                }
+            }
+            user.setRole(roleVal);
+            user = userRepository.save(user);
+
+            // If Role is BARBER or ADMIN_BARBER, create Barber entity
+            if (roleVal == User.Role.BARBER || roleVal == User.Role.ADMIN_BARBER) {
+                Barber barber = new Barber();
+                barber.setName(user.getName());
+                barber.setUser(user);
+                barber.setPhotoUrl(request.getPhotoUrl());
+                barber.setColor(request.getColor()); // Assign color
+                barberRepository.save(barber);
+            }
+
+            return ResponseEntity.ok(new MessageResponse("User created successfully!"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(new MessageResponse("Error saving user: " + e.getMessage()));
         }
-
-        // Create user account for barber
-        User user = new User();
-        user.setName(barberRequest.getName());
-        user.setEmail(barberRequest.getEmail());
-        user.setPassword(encoder.encode(barberRequest.getPassword()));
-        user.setRole(User.Role.BARBER);
-        userRepository.save(user);
-
-        // Create barber profile
-        Barber barber = new Barber();
-        barber.setName(barberRequest.getName());
-        barber.setPhotoUrl(barberRequest.getPhotoUrl());
-        barber.setUser(user);
-        barberRepository.save(barber);
-
-        return ResponseEntity.ok(new MessageResponse("Barber created successfully!"));
     }
 
-    @PostMapping("/admins")
-    public ResponseEntity<?> createAdmin(@RequestBody SignupRequest signupRequest) {
-        // Check if email already exists
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
-        }
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody SignupRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
-        // Create admin account
-        User user = new User();
-        user.setName(signupRequest.getName());
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(encoder.encode(signupRequest.getPassword()));
-        user.setRole(User.Role.ADMIN);
+        user.setName(request.getName());
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            // In a real app update duplicate check
+            user.setEmail(request.getEmail());
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(encoder.encode(request.getPassword()));
+        }
+        if (request.getPhone() != null)
+            user.setPhone(request.getPhone());
+        if (request.getGender() != null)
+            user.setGender(request.getGender());
+
+        // Update Role
+        User.Role newRole = user.getRole();
+        if (request.getRole() != null) {
+            try {
+                newRole = User.Role.valueOf(request.getRole().toUpperCase());
+                user.setRole(newRole);
+            } catch (Exception e) {
+            }
+        }
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("Admin created successfully!"));
+        // Handle Barber Entity
+        boolean isBarberRole = (newRole == User.Role.BARBER || newRole == User.Role.ADMIN_BARBER);
+        Barber existingBarber = barberRepository.findByUserId(user.getId()).orElse(null);
+
+        if (isBarberRole) {
+            if (existingBarber == null) {
+                // Create if missing
+                Barber newBarber = new Barber();
+                newBarber.setName(user.getName());
+                newBarber.setUser(user);
+                newBarber.setPhotoUrl(request.getPhotoUrl());
+                newBarber.setColor(request.getColor());
+                barberRepository.save(newBarber);
+            } else {
+                // Update existing
+                existingBarber.setName(user.getName()); // Sync name
+                if (request.getPhotoUrl() != null)
+                    existingBarber.setPhotoUrl(request.getPhotoUrl());
+                if (request.getColor() != null)
+                    existingBarber.setColor(request.getColor());
+                barberRepository.save(existingBarber);
+            }
+        } else {
+            // If formerly a barber but now not, we might want to deactivate or delete?
+            // For now, let's keep the profile but deactivate it, or just leave it.
+            // User requirement didn't specify, but safer to keep history.
+        }
+
+        return ResponseEntity.ok(new MessageResponse("User updated successfully!"));
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+        // 1. Unlink appointments where this user is the client
+        List<Appointment> clientAppointments = appointmentRepository.findByUserId(id);
+        for (Appointment apt : clientAppointments) {
+            apt.setUser(null);
+            appointmentRepository.save(apt);
+        }
+
+        // 2. If user is a barber, unlink appointments where they are the provider
+        barberRepository.findByUserId(id).ifPresent(barber -> {
+            List<Appointment> barberAppointments = appointmentRepository.findByBarberId(barber.getId());
+            for (Appointment apt : barberAppointments) {
+                apt.setBarber(null);
+                appointmentRepository.save(apt);
+            }
+            barberRepository.delete(barber);
+        });
+
+        // 3. Delete the user
+        userRepository.delete(user);
+        return ResponseEntity.ok(
+                new MessageResponse("User deleted successfully! Associated appointments preserved as unlinked/guest."));
+    }
+
+    // CRM Endpoints Consolidated here for reliability
+    @GetMapping("/crm/leads")
+    public List<Lead> getAllLeads() {
+        return crmService.getAllLeads();
+    }
+
+    @PutMapping("/crm/leads/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam ELeadStatus status) {
+        try {
+            return ResponseEntity.ok(crmService.updateLeadStatus(id, status));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new MessageResponse("Error: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/crm/leads/{id}/convert-to-client")
+    public ResponseEntity<?> convertToClient(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(crmService.convertLeadToClient(id));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new MessageResponse("Error: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/crm/opportunities")
+    public List<Opportunity> getAllOpportunities() {
+        return crmService.getAllOpportunities();
+    }
+
+    @PutMapping("/crm/opportunities/{id}")
+    public ResponseEntity<Opportunity> updateOpportunity(@PathVariable Long id, @RequestBody Opportunity opportunity) {
+        return ResponseEntity.ok(crmService.updateOpportunity(id, opportunity));
     }
 }

@@ -1,8 +1,28 @@
 <div class="barber-dashboard-container">
     <header class="dashboard-header">
-        <h1>My Appointments</h1>
-        <p>View and manage your scheduled appointments</p>
+        <h1>{{ stats.users ? 'Admin Dashboard' : 'My Appointments' }}</h1>
+        <p>View and manage your scheduled appointments{{ stats.users ? ' and CRM' : '' }}</p>
     </header>
+
+    <!-- Stats Section -->
+    <div class="stats-grid mb-4" *ngIf="stats.users">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.leads || 0 }}</div>
+            <div class="stat-label">Prospectos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.opportunities || 0 }}</div>
+            <div class="stat-label">Oportunidades</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.appointments || 0 }}</div>
+            <div class="stat-label">Citas Totales</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.users || 0 }}</div>
+            <div class="stat-label">Usuarios</div>
+        </div>
+    </div>
 
     <div class="calendar-section">
         <mat-card>

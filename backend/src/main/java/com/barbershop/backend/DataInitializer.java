@@ -1,16 +1,13 @@
 package com.barbershop.backend;
 
-import com.barbershop.backend.model.AppointmentType;
-import com.barbershop.backend.model.Barber;
-import com.barbershop.backend.model.User;
-import com.barbershop.backend.repository.AppointmentTypeRepository;
-import com.barbershop.backend.repository.BarberRepository;
-import com.barbershop.backend.repository.UserRepository;
+import com.barbershop.backend.model.*;
+import com.barbershop.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
 @Component
@@ -26,36 +23,66 @@ public class DataInitializer implements CommandLineRunner {
     private AppointmentTypeRepository appointmentTypeRepository;
 
     @Autowired
+    private LeadRepository leadRepository;
+
+    @Autowired
+    private OpportunityRepository opportunityRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("DataInitializer: Checking if seeding is needed...");
+        System.out.println("=================================================");
+        System.out.println("ALERTA: SINCRONIZACION FORZADA EN CURSO (V3)");
+        System.out.println("=================================================");
 
-        if (!userRepository.existsByEmail("admin@barbershop.com")) {
-            System.out.println("DataInitializer: No admin found. Seeding Demo Data...");
+        // Clean existing to be 100% sure
+        opportunityRepository.deleteAll();
+        leadRepository.deleteAll();
+        barberRepository.deleteAll();
+        appointmentTypeRepository.deleteAll();
+        userRepository.deleteAll();
 
-            // 1. Users
-            User admin = createUser("Admin", "admin@barbershop.com", "ADMIN");
-            User carlos = createUser("Carlos", "carlos@barbershop.com", "BARBER");
-            User pepe = createUser("Pepe", "pepe@barbershop.com", "BARBER");
-            User sarah = createUser("Sarah", "sarah@barbershop.com", "BARBER");
+        System.out.println("DataInitializer: Re-creating Database for Demo...");
 
-            // 2. Barbers
-            createBarber("Carlos", "assets/barbers/carlos.png", carlos);
-            createBarber("Pepe", "assets/barbers/pepe.png", pepe);
-            createBarber("Sarah", "assets/barbers/sarah.png", sarah);
+        // 1. Create Users
+        User admin = createUser("Admin", "admin@barbershop.com", "ADMIN");
+        User barberUser1 = createUser("Carlos G.", "carlos@barbershop.com", "BARBER");
+        User barberUser2 = createUser("Mike R.", "mike@barbershop.com", "BARBER");
+        createUser("Juan Pérez", "juan@test.com", "USER");
 
-            // 3. Appointment Types
-            createType("Corte Clásico", 15.00, 30, "#4CAF50");
-            createType("Barba y Corte", 25.00, 45, "#2196F3");
-            createType("Afeitado Premium", 20.00, 30, "#FFC107");
-            createType("Tinte de Cabello", 35.00, 60, "#9C27B0");
+        // 2. Create Barbers
+        createBarber("Carlos G.", "assets/barbers/carlos.png", barberUser1);
+        createBarber("Mike R.", "assets/barbers/mike.png", barberUser2);
 
-            System.out.println("DataInitializer: Demo Data Initialized Successfully!");
-        } else {
-            System.out.println("DataInitializer: Data already exists. Skipping.");
-        }
+        // 3. Create Appointment Types
+        AppointmentType t1 = createType("Corte Clásico", 15.00, 30, "#4CAF50");
+        AppointmentType t2 = createType("Barba y Corte", 25.00, 45, "#2196F3");
+        createType("Afeitado Premium", 20.00, 30, "#FFC107");
+
+        // 4. Create Leads (Prospectos)
+        Lead l1 = new Lead(null, "Roberto Gómez", "roberto@gmail.com", "555-0101", "Corte de boda", "CHATBOT",
+                ELeadStatus.NEW, LocalDateTime.now().minusDays(2), "Interesado en pack familiar.");
+        Lead l2 = new Lead(null, "Ana Martínez", "ana.m@outlook.com", "555-0102", "Tinte de cabello", "WEBSITE",
+                ELeadStatus.CONTACTED, LocalDateTime.now().minusDays(1), "Llamar por la tarde.");
+        Lead l3 = new Lead(null, "Sergio Ramos", "sergio@example.com", "555-0103", "Tratamiento facial", "CHATBOT",
+                ELeadStatus.QUALIFIED, LocalDateTime.now().minusHours(5), "Usuario fidelizado.");
+
+        leadRepository.save(l1);
+        leadRepository.save(l2);
+        leadRepository.save(l3);
+
+        // 5. Create Opportunities
+        Opportunity o1 = new Opportunity();
+        o1.setLead(l3);
+        o1.setServiceType(t1);
+        o1.setEstimatedValue(new BigDecimal("50.00"));
+        o1.setStatus(EOpportunityStatus.PENDING_APPOINTMENT);
+        o1.setFollowUpNotes("Esperando confirmación de fecha.");
+        opportunityRepository.save(o1);
+
+        System.out.println("DataInitializer: --- FORCE SYNC COMPLETE ---");
     }
 
     private User createUser(String name, String email, String role) {
@@ -76,12 +103,12 @@ public class DataInitializer implements CommandLineRunner {
         barberRepository.save(barber);
     }
 
-    private void createType(String name, double price, int duration, String color) {
+    private AppointmentType createType(String name, double price, int duration, String color) {
         AppointmentType type = new AppointmentType();
         type.setName(name);
         type.setPrice(price);
         type.setDurationMinutes(duration);
         type.setColor(color);
-        appointmentTypeRepository.save(type);
+        return appointmentTypeRepository.save(type);
     }
 }

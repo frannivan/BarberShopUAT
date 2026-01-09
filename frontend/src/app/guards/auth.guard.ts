@@ -18,7 +18,8 @@ export const adminGuard: CanActivateFn = (route, state) => {
     const storageService = inject(StorageService);
     const router = inject(Router);
 
-    if (storageService.isLoggedIn() && storageService.getUser().roles.includes('ADMIN')) {
+    const user = storageService.getUser();
+    if (storageService.isLoggedIn() && user && user.roles && (user.roles.includes('ADMIN') || user.roles.includes('ROLE_ADMIN'))) {
         return true;
     }
 

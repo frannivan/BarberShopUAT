@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { AppointmentService } from '../../services/appointment.service';
+import { AdminService } from '../../services/admin.service';
+import { AuthService } from '../../services/auth.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +14,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 @Component({
     selector: 'app-barber-dashboard',
     standalone: true,
-    imports: [CommonModule, MatCardModule, MatListModule, MatButtonModule, FullCalendarModule],
+    imports: [CommonModule, DatePipe, MatCardModule, MatListModule, MatButtonModule, FullCalendarModule],
     templateUrl: './barber-dashboard.component.html',
     styleUrls: ['./barber-dashboard.component.css']
 })
@@ -28,11 +30,26 @@ export class BarberDashboardComponent implements OnInit {
             endTime: '18:00',
         },
     };
+    stats: any = {};
 
-    constructor(private appointmentService: AppointmentService) { }
+    constructor(
+        private appointmentService: AppointmentService,
+        private adminService: AdminService,
+        private authService: AuthService
+    ) { }
 
     ngOnInit(): void {
         this.loadAppointments();
+        if (this.authService.isAdmin()) {
+            this.loadStats();
+        }
+    }
+
+    loadStats(): void {
+        this.adminService.getStats().subscribe({
+            next: data => this.stats = data,
+            error: err => console.error(err)
+        });
     }
 
     loadAppointments(): void {

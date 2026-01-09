@@ -23,9 +23,10 @@ public class Barber {
     @Column(nullable = false, columnDefinition = "boolean default true")
     private Boolean active = true;
 
+    private String color;
+
     @OneToOne
     @JoinColumn(name = "user_id", nullable = true)
-    @JsonIgnore
     private User user;
 
     public Barber(Long id, String name, String photoUrl) {

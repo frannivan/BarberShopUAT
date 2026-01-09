@@ -1,47 +1,682 @@
 .admin-container {
-    padding: 20px;
+    padding: 30px 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
+.admin-container h1 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
 .stats-section {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .stats-section mat-card {
-    padding: 20px;
+    background: rgba(42, 42, 42, 0.4) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    padding: 24px;
 }
 
 .stats-section mat-card-content {
     display: flex;
-    gap: 30px;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: flex-start;
 }
 
 .stats-section p {
-    font-size: 1.1em;
-    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stats-section p strong {
+    font-size: 1.8rem;
+    color: var(--accent-red);
 }
 
 .tab-content {
-    padding: 20px 0;
+    padding: 30px 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 .form-card {
-    margin-bottom: 20px;
+    background: rgba(42, 42, 42, 0.6) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 24px;
 }
 
 .full-width {
     width: 100%;
-    margin-bottom: 10px;
 }
 
 mat-card-actions {
-    padding: 16px;
+    padding: 16px !important;
+    justify-content: flex-end;
 }
 
 mat-list-item {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 12px 0 !important;
+}
+
+mat-list-item:last-child {
+    border-bottom: none !important;
+}
+
+::ng-deep .mat-mdc-list-item-title {
+    color: var(--text-white) !important;
+    font-weight: 700 !important;
+}
+
+::ng-deep .mat-mdc-list-item-line {
+    color: var(--text-gray) !important;
+}
+
+/* Utility for text truncation */
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+/* Ensure list item text wrapper doesn't overflow */
+::ng-deep .mat-mdc-list-item .mdc-list-item__content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* PREMIUM CRM STYLES */
+
+.stats-container-premium {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+}
+
+.stats-badge-premium {
+    background: var(--gradient-red, #e74c3c);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(231, 76, 60, 0.25);
+    min-width: 140px;
+}
+
+.stats-badge-premium .count {
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.stats-badge-premium .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.9;
+    letter-spacing: 1.2px;
+    margin-top: 6px;
+}
+
+.card-glass-premium {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.premium-crm-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    /* CRITICAL for header sync */
+}
+
+.premium-crm-table thead th {
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    padding: 1.2rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Explicit widths for Client Directory */
+.col-client {
+    width: 30%;
+}
+
+.col-contact {
+    width: 30%;
+}
+
+.col-phone-crm {
+    width: 20%;
+}
+
+.col-actions {
+    width: 20%;
+}
+
+/* Explicit widths for Users Management - Rebalanced to 100% */
+.col-user {
+    width: 15%;
+    /* Made narrower as requested (absolute-like) */
+}
+
+.col-email {
+    width: 20%;
+}
+
+.col-phone {
+    width: 15%;
+}
+
+.col-role {
+    width: 10%;
+}
+
+.col-status {
+    width: 15%;
+}
+
+.col-actions-sm {
+    width: 25%;
+    /* Widened to take up space from removed status column */
+}
+
+/* Explicit widths for Appointments */
+.col-datetime {
+    width: 25%;
+}
+
+.col-apt-client {
+    width: 25%;
+}
+
+.col-barber {
+    width: 20%;
+}
+
+.col-status {
+    width: 15%;
+}
+
+.col-apt-actions {
+    width: 15%;
+}
+
+.premium-row {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.premium-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.premium-row td {
+    padding: 1.2rem 1.5rem;
+    vertical-align: middle;
+    border: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-main-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-sub-text {
+    color: var(--text-gray);
+    font-weight: 500;
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-indicator-premium {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+}
+
+.status-indicator-premium.BOOKED {
+    background: rgba(52, 152, 219, 0.15);
+    color: #3498db;
+    border-color: rgba(52, 152, 219, 0.3);
+}
+
+.status-indicator-premium.COMPLETED {
+    background: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+    border-color: rgba(46, 204, 113, 0.3);
+}
+
+.status-indicator-premium.CANCELLED {
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+    border-color: rgba(231, 76, 60, 0.3);
+}
+
+.role-badge {
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-action-lux {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 40px;
+}
+
+.btn-action-lux:hover {
+    background: var(--accent-red);
+    transform: translateY(-2px);
+    border-color: var(--accent-red);
+}
+
+.btn-toggle {
+    min-width: 100px;
+    font-weight: 800;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-toggle.active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    /* Green */
+    border-color: #2ecc71;
+}
+
+.btn-toggle.inactive {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    /* Red */
+    border-color: #e74c3c;
+}
+
+.btn-toggle:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-action-lux.warn:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+}
+
+.empty-state-premium {
+    padding: 5rem 0;
+    color: var(--text-gray);
+    text-align: center;
+}
+
+.empty-state-premium i {
+    font-size: 3.5rem;
+    opacity: 0.2;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+/* PROPER MODERN FILTER DROPDOWN */
+.status-select {
+    width: 100%;
+}
+
+/* Remove default underline */
+.status-select ::ng-deep .mat-mdc-form-field-underline {
+    display: none !important;
+}
+
+/* Glassmorphism Input Container */
+/* Glassmorphism Input Container */
+.status-select ::ng-deep .mat-mdc-form-field-flex {
+    background: rgba(255, 255, 255, 0.12) !important;
+    /* Lighter */
+    backdrop-filter: blur(10px);
+    border-radius: 50px !important;
+    /* PILL SHAPE */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0 20px !important;
+    transition: all 0.3s ease;
+    height: 42px;
+    /* Match button height approx */
+    align-items: center;
+}
+
+.status-select ::ng-deep .mat-mdc-form-field-flex:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+}
+
+/* Hide the reserved space below input (subscript) for perfect centering */
+.status-select ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+}
+
+/* Adjust Infix to center text vertically */
+.status-select ::ng-deep .mat-mdc-form-field-infix {
+    padding: 8px 0 !important;
+    min-height: unset !important;
+    border-top: none !important;
+}
+
+/* Focused State */
+.status-select ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-flex {
+    border-color: var(--accent-gold) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Text Colors */
+.status-select ::ng-deep .mat-mdc-select-value-text {
+    color: white !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.status-select ::ng-deep .mat-mdc-select-arrow {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Dropdown Panel - Modern Dark Glass */
+::ng-deep .mat-mdc-select-panel {
+    background: #2c2c2c !important;
+    /* Lighter dark base */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px !important;
+    margin-top: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+::ng-deep .mat-mdc-option {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin: 4px 8px;
+    /* Breathing room */
+    border-radius: 8px;
+}
+
+::ng-deep .mat-mdc-option:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+}
+
+::ng-deep .mat-mdc-option.mdc-list-item--selected {
+    background: var(--gradient-gold) !important;
+    /* Or simple gold color */
+    color: black !important;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Hide label floating logic to make it look like a clean button if desired, 
+   or keep it sleek. Let's customize the label too. */
+.status-select ::ng-deep .mat-mdc-form-field-label {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-weight: 600;
+}
+
+/* MISSING CLASSES FOR CLIENT DIRECTORY */
+.user-icon-lux {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--accent-red);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    /* Important: Don't shrink to keep alignment */
+    margin-right: 1rem;
+}
+
+.search-box-lux .premium-search {
+    width: 100%;
+}
+
+.search-box-lux ::ng-deep .mat-mdc-form-field-flex {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 12px !important;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-white);
+    letter-spacing: 0.5px;
+}
+
+/* Fix for table alignment and scroll */
+.table-scroll-container {
+    max-height: 500px;
+    overflow-y: auto;
+    position: relative;
+    border-radius: 0 0 20px 20px;
+}
+
+.table-scroll-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #1e1e1e;
+    /* Correct theme dark color */
+}
+
+/* NEON SWITCH STYLES */
+.neon-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.neon-switch-wrapper:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.neon-switch {
+    width: 44px;
+    height: 24px;
+    background: rgba(20, 20, 20, 0.8);
+    border-radius: 50px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.switch-bulb {
+    width: 18px;
+    height: 18px;
+    background: #e74c3c;
+    /* Red OFF */
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+/* ACTIVE STATE */
+.neon-switch.active {
+    background: rgba(46, 204, 113, 0.1);
+    border-color: #2ecc71;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.neon-switch.active .switch-bulb {
+    left: 22px;
+    background: #2ecc71;
+    /* Green ON */
+    box-shadow: 0 0 15px #2ecc71, 0 0 25px #2ecc71;
+    animation: pulse-glow 2s infinite;
+}
+
+.neon-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #e74c3c;
+    transition: all 0.3s ease;
+}
+
+.neon-label.active-text {
+    color: #2ecc71;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 15px #2ecc71;
+    }
+
+    50% {
+        box-shadow: 0 0 25px #2ecc71, 0 0 35px rgba(46, 204, 113, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 15px #2ecc71;
+    }
+}
+
+
+/* Helper for center alignment as requested */
+.center {
+    text-align: center !important;
+}
+
+/* MODAL TEXT VISIBILITY FIXES */
+.user-modal-card input,
+.user-modal-card mat-select,
+.user-modal-card .mat-mdc-select-value-text,
+.user-modal-card .mat-mdc-input-element {
+    color: #ffffff !important;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+    /* "Billoso" effect */
+    caret-color: #ffffff;
+}
+
+/* Ensure placeholders are visible but distinct */
+.user-modal-card ::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Ensure form field labels are visible */
+.user-modal-card .mat-mdc-form-field-label {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Override underlines to be visible */
+.user-modal-card .mat-mdc-form-field-underline {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* SEXY CLOSE BUTTON */
+.close-btn-sexy {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1002;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    padding: 0;
+}
+
+.close-btn-sexy mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: normal;
+}
+
+.close-btn-sexy:hover {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
+    color: #e74c3c;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+}
+
+.close-btn-sexy:active {
+    transform: rotate(90deg) scale(0.95);
 }

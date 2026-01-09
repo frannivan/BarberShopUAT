@@ -1,0 +1,9 @@
+<div class="radio-container">
+    <audio #audioPlayer [src]="streamUrl" crossorigin="anonymous"></audio>
+
+    <button mat-icon-button class="radio-btn" [class.playing]="isPlaying" (click)="togglePlay()"
+        matTooltip="Ibiza Global Radio">
+        <mat-icon>{{ isPlaying ? 'volume_up' : 'volume_off' }}</mat-icon>
+        <div class="pulse-ring" *ngIf="isPlaying"></div>
+    </button>
+</div>

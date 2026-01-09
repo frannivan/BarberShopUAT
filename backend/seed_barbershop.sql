@@ -6,12 +6,12 @@
 SET search_path TO "barbershop";
 
 -- 1. Insertar Usuarios (Password: 123456)
--- Generado con BCrypt: $2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRlgBPiGNyF7lnWkbnvehT0S5vi
+-- Generado con BCrypt: $2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdU9OOfWvXidC6DCp/9jS
 INSERT INTO users (email, password, name, role) VALUES 
-('admin@barbershop.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRlgBPiGNyF7lnWkbnvehT0S5vi', 'Admin', 'ADMIN'),
-('carlos@barbershop.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRlgBPiGNyF7lnWkbnvehT0S5vi', 'Carlos', 'BARBER'),
-('pepe@barbershop.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRlgBPiGNyF7lnWkbnvehT0S5vi', 'Pepe', 'BARBER'),
-('sarah@barbershop.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRlgBPiGNyF7lnWkbnvehT0S5vi', 'Sarah', 'BARBER');
+('admin@barbershop.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdU9OOfWvXidC6DCp/9jS', 'Admin', 'ADMIN'),
+('carlos@barbershop.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdU9OOfWvXidC6DCp/9jS', 'Carlos', 'BARBER'),
+('pepe@barbershop.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdU9OOfWvXidC6DCp/9jS', 'Pepe', 'BARBER'),
+('sarah@barbershop.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdU9OOfWvXidC6DCp/9jS', 'Sarah', 'BARBER');
 
 -- 2. Insertar Barberos (Vinculados a usuarios)
 INSERT INTO barbers (name, photoUrl, active, user_id) VALUES 

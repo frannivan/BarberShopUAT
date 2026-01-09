@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { StorageService } from './storage.service';
 
 import { environment } from '../../environments/environment';
 
@@ -14,7 +15,7 @@ const httpOptions = {
     providedIn: 'root'
 })
 export class AuthService {
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private storageService: StorageService) { }
 
     login(credentials: any): Observable<any> {
         return this.http.post(AUTH_API + 'signin', {
@@ -38,5 +39,17 @@ export class AuthService {
 
     deleteUser(id: number): Observable<any> {
         return this.http.delete(AUTH_API + 'users/' + id);
+    }
+
+    isLoggedIn(): boolean {
+        return !!this.storageService.getUser()?.token;
+    }
+
+    isAdmin(): boolean {
+        const user = this.storageService.getUser();
+        if (!user || !user.roles) {
+            return false;
+        }
+        return user.roles.includes('ADMIN') || user.roles.includes('ROLE_ADMIN');
     }
 }

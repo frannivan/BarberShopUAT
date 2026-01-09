@@ -1,16 +1,19 @@
-
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ViewChild, HostListener } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Subscription, Observable } from 'rxjs';
+import { filter, startWith, map } from 'rxjs/operators';
+import { NavigationEnd, ActivatedRoute, Router } from '@angular/router';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventClickArg } from '@fullcalendar/core';
+import { CalendarOptions, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import interactionPlugin, { EventResizeDoneArg } from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import esLocale from '@fullcalendar/core/locales/es';
 import { AppointmentService } from '../../services/appointment.service';
 import { StorageService } from '../../services/storage.service';
+import { AdminService } from '../../services/admin.service'; // Added
 import { BarberService } from '../../services/barber.service';
 import { ServiceTypeService } from '../../services/service-type.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -19,7 +22,18 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { FormsModule } from '@angular/forms';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { AuthService } from '../../services/auth.service';
+
 import { RouterModule } from '@angular/router';
 
 // Color palette for barbers
@@ -38,33 +52,68 @@ const BARBER_COLORS = [
     selector: 'app-booking',
     standalone: true,
     imports: [
-        FullCalendarModule,
         CommonModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatInputModule,
+        DatePipe,
+        MatDialogModule,
         MatButtonModule,
-        MatCardModule,
         MatIconModule,
-        MatDatepickerModule,
+        MatCardModule,
+        MatTabsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
         MatNativeDateModule,
+        MatDatepickerModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatSnackBarModule,
         FormsModule,
-        RouterModule
+        ReactiveFormsModule, // Added
+        MatAutocompleteModule, // Added
+        MatSlideToggleModule, // Added
+        RouterModule,
+        MatTableModule,
+        FullCalendarModule
     ],
     templateUrl: './booking.component.html',
     styleUrls: ['./booking.component.css']
 })
-export class BookingComponent implements OnInit {
+export class BookingComponent implements OnInit, OnDestroy {
+    private routerSubscription: Subscription | undefined;
+
+
+    // Guest Fields
+    editGuestName: string = '';
+    editGuestEmail: string = '';
+    editGuestPhone: string = '';
     calendarOptions: CalendarOptions = {
         initialView: 'timeGridWeek',
         plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin],
         dateClick: (arg) => {
             console.log('dateClick triggered:', arg);
-            this.handleDateClick(arg);
+            this.ngZone.run(() => {
+                this.handleDateClick(arg);
+            });
         },
         eventClick: (arg) => {
             console.log('eventClick triggered:', arg);
-            this.handleEventClick(arg);
+            this.ngZone.run(() => {
+                this.handleEventClick(arg);
+            });
+        },
+        editable: true,
+        eventDrop: (arg) => {
+            console.log('eventDrop triggered:', arg);
+            this.ngZone.run(() => {
+                this.handleEventDrop(arg);
+            });
+        },
+        eventResize: (arg) => {
+            console.log('eventResize triggered:', arg);
+            this.ngZone.run(() => {
+                this.handleEventResize(arg);
+            });
         },
         selectable: true,
         events: [],
@@ -75,18 +124,31 @@ export class BookingComponent implements OnInit {
         },
         slotMinTime: '09:00:00',
         slotMaxTime: '18:00:00',
+        allDaySlot: false,
         selectConstraint: 'businessHours',
         select: (arg) => {
             console.log('select triggered:', arg);
-            this.handleDateClick(arg);
+            this.ngZone.run(() => {
+                this.handleDateClick(arg);
+            });
         },
     };
 
     barbers: any[] = [];
     barberColors: Map<number, string> = new Map();
-    selectedBarberId: number | null = null;
+    selectedBarberId: number = 0; // Default to 'All Barbers'
     isLoggedIn = false;
     isAdmin = false;
+    isBarber = false;
+
+    // List view properties
+    displayedColumns: string[] = ['date', 'time', 'barber', 'client', 'type', 'notes', 'actions'];
+    dataSource: MatTableDataSource<any> = new MatTableDataSource();
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
+
+    // View Switcher
+    selectedView: 'calendar' | 'list' | 'both' = 'calendar';
 
     // Guest info
     guestName = '';
@@ -107,36 +169,152 @@ export class BookingComponent implements OnInit {
     editBarberId: number | null = null;
     editDate: Date | null = null;
     editTime: string = '';
+    editEndTime: string = '';
+    editStatus: string = '';
     editNotes: string = '';
     editTypeId: number | null = null;
     serviceTypes: any[] = [];
     isSaving = false;
 
+    // Unified Booking Modal
+    showBookingModal = false;
+    bookingBarberId: number | null = null;
+    bookingDate: Date | null = null;
+    bookingTime: string = '';
+    bookingEndTime: string = ''; // New field for custom duration
+    bookingTypeId: number | null = null;
+    bookingNotes: string = '';
+
+    // Guest fields for unified modal
+    bookingGuestName = '';
+    bookingGuestEmail = '';
+    bookingGuestPhone = '';
+
+    // Client Selection Logic
+    isGuestBooking = false; // Default to Client Selection for Admin
+    clientControl = new FormControl();
+    clients: any[] = [];
+    filteredClients!: Observable<any[]>; // Added definite assignment assertion
+    selectedClientId: number | null = null;
+
+    // Quick Client Creation
+    showQuickClientModal = false;
+    newClient = {
+        name: '',
+        email: '',
+        phone: '',
+        password: '', // Required for creation
+        role: 'CLIENTE'
+    };
+
     constructor(
         private appointmentService: AppointmentService,
         private storageService: StorageService,
         private barberService: BarberService,
+        private authService: AuthService,
+        private adminService: AdminService, // Re-added for creating users
         private serviceTypeService: ServiceTypeService,
         private route: ActivatedRoute,
         private router: Router,
-        private cdr: ChangeDetectorRef
-    ) { }
+        private cdr: ChangeDetectorRef,
+        private ngZone: NgZone,
+        private snackBar: MatSnackBar
+    ) {
+        // Force refresh when navigating to the same URL
+        this.routerSubscription = this.router.events.pipe(
+            filter(e => e instanceof NavigationEnd)
+        ).subscribe(() => {
+            this.fullReload();
+        });
+    }
 
     ngOnInit(): void {
+        this.fullReload();
+    }
+
+    ngOnDestroy(): void {
+        if (this.routerSubscription) {
+            this.routerSubscription.unsubscribe();
+        }
+    }
+
+    private fullReload(): void {
         this.isLoggedIn = this.storageService.isLoggedIn();
         const user = this.storageService.getUser();
-        this.isAdmin = user?.role === 'ADMIN' || user?.roles?.includes('ADMIN');
+        // Robust Admin Check (Case-insensitive, handles ROLE_ prefix)
+        const role = String(user?.role || '').toUpperCase();
+        const roles = Array.isArray(user?.roles) ? user.roles.map((r: string) => String(r).toUpperCase()) : [];
+
+        this.isAdmin = role === 'ADMIN' ||
+            role === 'ROLE_ADMIN' ||
+            roles.includes('ADMIN') ||
+            roles.includes('ROLE_ADMIN');
+
+        this.isBarber = role === 'BARBER' ||
+            role === 'ROLE_BARBER' ||
+            roles.includes('BARBER') ||
+            roles.includes('ROLE_BARBER');
+
+        console.log('Admin Check:', { role, roles, result: this.isAdmin });
         this.loadBarbers();
         this.loadServiceTypes();
+        this.loadAppointmentsForList(); // Preload for list view
+        if (this.isAdmin) {
+            this.loadClients();
+        }
+
         this.route.queryParams.subscribe(params => {
+            if (params['action'] === 'new') {
+                this.openBookingModal();
+            }
             if (params['appointmentId']) {
-                // Load specific appointment for editing
                 const appointmentId = +params['appointmentId'];
                 this.loadAppointmentForEdit(appointmentId);
             } else if (params['barberId']) {
                 this.selectedBarberId = +params['barberId'];
                 this.loadBarberAppointments(this.selectedBarberId);
             }
+        });
+    }
+
+    loadAppointmentsForList(): void {
+        this.appointmentService.getAppointments().subscribe({
+            next: (data) => {
+                let filteredData = data;
+                const user = this.storageService.getUser();
+
+                if (this.isLoggedIn && user) {
+                    if (user.role === 'USER') {
+                        // User sees only their own appointments
+                        filteredData = data.filter((x: any) => x.user?.id === user.id || x.clientEmail === user.email);
+                    } else if (user.role === 'BARBER') {
+                        // Barber sees only their assignments
+                        // Assuming user.id links to barber.id or externalId. 
+                        // If logic is complex, backend should handle. For now, filter by barberId matches userId if they map 1:1 or use email.
+                        // Let's assume the user object has an ID that matches the barber's ID or we filter by email/name.
+                        // For safety, if backend sends all, we filter by barber name or ID.
+                        // Ideally backend does this.
+                    }
+                    // Admin sees all (no filter)
+                }
+
+                this.dataSource.data = filteredData.map((apt: any) => ({
+                    ...apt,
+                    clientName: apt.clientName || apt.user?.name || apt.guestName || 'Unknown',
+                    displayTime: new Date(apt.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    displayDate: new Date(apt.startTime)
+                }));
+
+                setTimeout(() => {
+                    this.dataSource.paginator = this.paginator;
+                    this.dataSource.sort = this.sort;
+                    if (this.sort) {
+                        this.sort.active = 'date';
+                        this.sort.direction = 'desc';
+                    }
+                });
+            },
+            error: (e) => console.error(e)
         });
     }
 
@@ -147,19 +325,149 @@ export class BookingComponent implements OnInit {
     }
 
     loadBarbers(): void {
-        this.barberService.getBarbers().subscribe({
+        const fetch$ = this.isAdmin ? this.barberService.getAllBarbersAdmin() : this.barberService.getBarbers();
+
+        fetch$.subscribe({
             next: data => {
                 this.barbers = data;
-                // Assign colors to each barber
                 this.barbers.forEach((barber, index) => {
-                    this.barberColors.set(barber.id, BARBER_COLORS[index % BARBER_COLORS.length]);
+                    // Use DB color if available, otherwise fallback to cycle
+                    const color = barber.color || BARBER_COLORS[index % BARBER_COLORS.length];
+                    this.barberColors.set(barber.id, color);
                 });
+
+                // If selectedBarberId is 0, load all after barbers are available
+                if (this.selectedBarberId === 0) {
+                    this.loadAllAppointments();
+                }
+
                 this.cdr.detectChanges();
             },
             error: err => {
                 console.error(err);
             }
         });
+    }
+
+    get activeBarbers(): any[] {
+        return this.barbers.filter(b => b.active !== false);
+    }
+
+    // Load Clients for Autocomplete
+    loadClients(): void {
+        // Fetch all users using AuthService (Admin role check assumed)
+        this.authService.getUsers().subscribe({
+            next: (data: any[]) => {
+                // Filter only clients/users
+                this.clients = data.filter(u => u.role === 'CLIENTE' || u.role === 'USER');
+
+                this.filteredClients = this.clientControl.valueChanges.pipe(
+                    startWith(''),
+                    map(value => {
+                        const name = typeof value === 'string' ? value : value?.name;
+                        return name ? this._filterClients(name as string) : this.clients.slice();
+                    })
+                );
+            },
+            error: (err) => console.error('Error loading clients', err)
+        });
+    }
+
+    private _filterClients(name: string): any[] {
+        const filterValue = name.toLowerCase();
+        return this.clients.filter(client =>
+            client.name.toLowerCase().includes(filterValue) ||
+            client.email.toLowerCase().includes(filterValue)
+        );
+    }
+
+    displayClientFn(client: any): string {
+        return client && client.name ? client.name : '';
+    }
+
+    onClientSelected(event: any): void {
+        console.log('onClientSelected triggered:', event.option.value);
+        const value = event.option.value;
+        if (value && value.id === 'NEW') {
+            console.log('Opening Quick Client Modal...');
+            this.openQuickClientModal();
+            // Reset the control so "Crear Nuevo Cliente" doesn't stay in the input
+            setTimeout(() => this.clientControl.setValue(null), 100);
+        } else {
+            console.log('Client selected:', value);
+            this.selectedClientId = value.id;
+        }
+    }
+
+    // Quick Client Modal Logic
+    openQuickClientModal() {
+        console.log('openQuickClientModal called.');
+
+        // Wrap in timeout to allow Autocomplete event to finish before destroying view
+        setTimeout(() => {
+            console.log('Hiding Booking Modal and showing Quick Modal');
+            this.showBookingModal = false; // TEMPORARILY HIDE BOOKING MODAL
+
+            this.newClient = {
+                name: '',
+                email: '',
+                phone: '',
+                password: '',
+                role: 'CLIENTE'
+            };
+            this.showQuickClientModal = true;
+            this.cdr.detectChanges();
+        }, 150);
+    }
+
+    closeQuickClientModal() {
+        this.showQuickClientModal = false;
+        // RESTORE BOOKING MODAL
+        this.showBookingModal = true;
+        this.cdr.detectChanges();
+    }
+
+    saveQuickClient(): void {
+        if (!this.newClient.name || !this.newClient.email || !this.newClient.password) return;
+
+        // Assign 'CLIENT' role by default
+        this.newClient.role = 'CLIENT';
+
+        this.adminService.saveUser(this.newClient).subscribe({
+            next: (createdUser: any) => {
+                this.snackBar.open('¡Cliente registrado con éxito!', 'Cerrar', { duration: 3000, panelClass: ['green-snackbar'] });
+
+                // Add to local list immediately so it can be searched
+                this.clients.push(createdUser); // Changed from allClients to clients based on context
+
+                // Update the autocomplete control to select this new user
+                this.clientControl.setValue(createdUser);
+                this.onClientSelected({ option: { value: createdUser } } as any);
+
+                this.closeQuickClientModal();
+
+                // Reset form
+                this.newClient = { name: '', email: '', phone: '', password: '', role: 'CLIENTE' }; // Reverted to original structure
+            },
+            error: (err: any) => {
+                console.error('Error creating client', err);
+                const msg = err.error?.message || 'Error al registrar cliente';
+                this.snackBar.open(msg, 'Cerrar', { duration: 4000, panelClass: ['red-snackbar'] });
+            }
+        });
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            if (this.showQuickClientModal) {
+                this.closeQuickClientModal();
+            } else if (this.showBookingModal) {
+                this.closeBookingModal();
+            } else if (this.showAppointmentDetail) {
+                this.closeAppointmentDetail();
+            }
+        }
     }
 
     getBarberColor(barberId: number): string {
@@ -190,7 +498,7 @@ export class BookingComponent implements OnInit {
                 next: data => {
                     const barberEvents = data.map((appt: any) => ({
                         id: appt.id,
-                        title: barber.name || 'Booked',
+                        title: `${barber.name} - ${appt.clientName || appt.guestName || 'Cliente'}`,
                         start: appt.startTime,
                         end: appt.endTime,
                         color: this.getBarberColor(barber.id),
@@ -228,7 +536,7 @@ export class BookingComponent implements OnInit {
                 const barber = this.barbers.find(b => b.id === barberId);
                 this.calendarOptions.events = data.map((appt: any) => ({
                     id: appt.id,
-                    title: barber?.name || 'Booked',
+                    title: `${barber?.name || 'Barbero'} - ${appt.clientName || appt.guestName || 'Cliente'}`,
                     start: appt.startTime,
                     end: appt.endTime,
                     color: this.getBarberColor(barberId),
@@ -260,24 +568,231 @@ export class BookingComponent implements OnInit {
         }
 
         this.selectedAppointment = {
-            id: clickInfo.event.extendedProps['appointmentId'],
+            id: clickInfo.event.extendedProps?.['appointmentId'],
             title: clickInfo.event.title,
             start: clickInfo.event.start,
             end: clickInfo.event.end,
-            barber: clickInfo.event.extendedProps['barber'],
-            clientName: clickInfo.event.extendedProps['clientName'],
-            clientEmail: clickInfo.event.extendedProps['clientEmail'],
-            clientPhone: clickInfo.event.extendedProps['clientPhone'],
-            status: clickInfo.event.extendedProps['status'],
-            color: clickInfo.event.backgroundColor
+            barber: clickInfo.event.extendedProps?.['barber'],
+            clientName: clickInfo.event.extendedProps?.['clientName'],
+            clientEmail: clickInfo.event.extendedProps?.['clientEmail'],
+            clientPhone: clickInfo.event.extendedProps?.['clientPhone'],
+            status: clickInfo.event.extendedProps?.['status'],
+            color: clickInfo.event.backgroundColor,
+            extendedProps: clickInfo.event.extendedProps
         };
         this.showAppointmentDetail = true;
         this.cdr.detectChanges();
     }
 
-    closeAppointmentDetail(): void {
+    handleEventDrop(arg: EventDropArg): void {
+        console.log('Event dropped:', arg);
+
+        if (!this.isAdmin) {
+            this.snackBar.open('Only admins can reschedule appointments by dragging.', 'Close', { duration: 3000 });
+            arg.revert();
+            return;
+        }
+
+        const appointmentId = arg.event.extendedProps?.['appointmentId'];
+        const newStart = arg.event.start;
+
+        if (!appointmentId || !newStart) {
+            this.snackBar.open('Invalid appointment data.', 'Close', { duration: 3000 });
+            arg.revert();
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to reschedule this appointment to ${newStart.toLocaleString()}?`)) {
+            arg.revert();
+            return;
+        }
+
+        const updateData: any = {
+            startTime: this.formatDateForBackend(newStart.toISOString()),
+            endTime: arg.event.end ? this.formatDateForBackend(arg.event.end.toISOString()) : null,
+            barberId: arg.event.extendedProps?.['barber']?.id,
+            notes: arg.event.extendedProps?.['notes'],
+            appointmentTypeId: arg.event.extendedProps?.['appointmentType']?.id,
+            status: arg.event.extendedProps?.['status']
+        };
+
+        this.appointmentService.updateAppointment(appointmentId, updateData).subscribe({
+            next: () => {
+                this.snackBar.open('Appointment rescheduled successfully!', 'Close', { duration: 3000 });
+            },
+            error: (err) => {
+                console.error('Error rescheduling appointment:', err);
+                this.snackBar.open('Failed to reschedule appointment: ' + (err.error?.message || err.message), 'Close', { duration: 5000 });
+                arg.revert();
+            }
+        });
+    }
+
+    handleEventResize(arg: EventResizeDoneArg): void {
+        console.log('Event resized:', arg);
+
+        if (!this.isAdmin && !this.isBarber) {
+            this.snackBar.open('Only admins and barbers can resize appointments.', 'Close', { duration: 3000 });
+            arg.revert();
+            return;
+        }
+
+        const appointmentId = arg.event.extendedProps?.['appointmentId'];
+        const newEnd = arg.event.end;
+
+        if (!appointmentId || !newEnd) {
+            arg.revert();
+            return;
+        }
+
+        if (!confirm(`Confirm extending appointment to ${newEnd.toLocaleTimeString()}?`)) {
+            arg.revert();
+            return;
+        }
+
+        const updateData: any = {
+            // Start time didn't change, but we must send it or backend might complain if validation is strict? 
+            // Actually controller checks: if startTime provided... 
+            // If we only want to update EndTime, we can send just endTime if controller supports it.
+            // My controller update logic:
+            // if (request.getEndTime() != null) appointment.setEndTime...
+            // It allows updating just endTime if startTime is null.
+            // BUT, safe to send all.
+            startTime: this.formatDateForBackend(arg.event.start!.toISOString()),
+            endTime: this.formatDateForBackend(newEnd.toISOString()),
+            barberId: arg.event.extendedProps?.['barber']?.id,
+            notes: arg.event.extendedProps?.['notes'],
+            appointmentTypeId: arg.event.extendedProps?.['appointmentType']?.id,
+            status: arg.event.extendedProps?.['status']
+        };
+
+        this.appointmentService.updateAppointment(appointmentId, updateData).subscribe({
+            next: () => {
+                this.snackBar.open('Appointment duration updated!', 'Close', { duration: 3000 });
+            },
+            error: (err) => {
+                console.error('Error resizing appointment:', err);
+                this.snackBar.open('Failed to resize: ' + err.message, 'Close', { duration: 3000 });
+                arg.revert();
+            }
+        });
+
+    }
+
+    onStartTimeChange() {
+        if (!this.bookingTime) return;
+
+        const [hours, minutes] = this.bookingTime.split(':').map(Number);
+        const startTime = new Date();
+        startTime.setHours(hours, minutes, 0, 0);
+
+        // Add 30 minutes
+        const endTime = new Date(startTime.getTime() + 30 * 60 * 1000);
+        const endHours = endTime.getHours().toString().padStart(2, '0');
+        const endMinutes = endTime.getMinutes().toString().padStart(2, '0');
+
+        this.bookingEndTime = `${endHours}:${endMinutes}`;
+    }
+
+    private isBarberActive(id: number): boolean {
+        return this.activeBarbers.some(b => b.id === id);
+    }
+
+    openBookingModal() {
+        // Force reset
+        this.showBookingModal = false;
+        this.cdr.detectChanges();
+
+        this.bookingDate = new Date();
+        this.bookingTime = '';
+        this.bookingEndTime = '';
+
+        // Fix: Only pre-select if active
+        if (this.selectedBarberId !== 0 && this.isBarberActive(this.selectedBarberId)) {
+            this.bookingBarberId = this.selectedBarberId;
+        } else {
+            this.bookingBarberId = null;
+        }
+
+        // Reset defaults
+        this.bookingTypeId = null;
+        this.bookingNotes = '';
+        this.bookingGuestName = '';
+        this.bookingGuestEmail = '';
+        this.bookingGuestPhone = '';
+
+        setTimeout(() => {
+            this.showBookingModal = true;
+            this.cdr.detectChanges();
+        }, 50);
+    }
+
+    // ... (omitted)
+
+    handleDateClick(arg: any) {
+        // Force reset
+        this.showBookingModal = false;
+        this.cdr.detectChanges();
+
+        console.log('handleDateClick called:', arg);
+        const dateStr = arg.dateStr || arg.startStr;
+        if (!dateStr) return;
+
+        this.bookingDate = new Date(dateStr);
+        const hours = this.bookingDate.getHours().toString().padStart(2, '0');
+        const minutes = this.bookingDate.getMinutes().toString().padStart(2, '0');
+        this.bookingTime = `${hours}:${minutes}`;
+
+        // Initialize End Time (Default +30 Minutes)
+        const endTime = new Date(this.bookingDate.getTime() + 30 * 60 * 1000);
+        const endHours = endTime.getHours().toString().padStart(2, '0');
+        const endMinutes = endTime.getMinutes().toString().padStart(2, '0');
+        this.bookingEndTime = `${endHours}:${endMinutes}`;
+
+        // Fix: Only pre-select if active
+        if (this.selectedBarberId !== 0 && this.isBarberActive(this.selectedBarberId)) {
+            this.bookingBarberId = this.selectedBarberId;
+        } else {
+            this.bookingBarberId = null;
+        }
+
+        // Reset defaults
+        this.bookingTypeId = null;
+        this.bookingNotes = '';
+        this.bookingGuestName = '';
+        this.bookingGuestEmail = '';
+        this.bookingGuestPhone = '';
+
+        // Reset Client Selection Logic
+        this.isGuestBooking = false;
+        this.selectedClientId = null;
+
+        // Re-initialize control to force clean state
+        this.clientControl = new FormControl();
+        this.filteredClients = this.clientControl.valueChanges.pipe(
+            startWith(''),
+            map(value => this._filterClients(value))
+        );
+
+        if (this.showQuickClientModal) {
+            this.showQuickClientModal = false; // Ensure overlay is closed
+        }
+
+        setTimeout(() => {
+            this.showBookingModal = true;
+            this.cdr.detectChanges();
+        }, 200); // Increased delay to ensure DOM teardown
+    }
+
+    closeAppointmentDetail() {
         this.showAppointmentDetail = false;
         this.selectedAppointment = null;
+    }
+
+    closeBookingModal() {
+        this.showBookingModal = false;
+        // Clean params
+        this.router.navigate([], { queryParams: { action: null }, queryParamsHandling: 'merge' });
     }
 
     deleteAppointment(): void {
@@ -292,8 +807,8 @@ export class BookingComponent implements OnInit {
         this.isDeleting = true;
         this.appointmentService.cancelAppointment(this.selectedAppointment.id).subscribe({
             next: () => {
-                alert('Appointment deleted successfully!');
-                this.closeAppointmentDetail();
+                this.snackBar.open('Appointment deleted successfully!', 'Close', { duration: 3000 });
+                this.closeBookingModal();
                 // Reload appointments
                 if (this.selectedBarberId === 0) {
                     this.loadAllAppointments();
@@ -304,7 +819,7 @@ export class BookingComponent implements OnInit {
             },
             error: err => {
                 console.error('Error deleting appointment:', err);
-                alert('Failed to delete appointment: ' + (err.error?.message || err.message));
+                this.snackBar.open('Failed to delete appointment: ' + (err.error?.message || err.message), 'Close', { duration: 3000 });
                 this.isDeleting = false;
             }
         });
@@ -321,6 +836,22 @@ export class BookingComponent implements OnInit {
         const hours = this.editDate.getHours().toString().padStart(2, '0');
         const minutes = this.editDate.getMinutes().toString().padStart(2, '0');
         this.editTime = `${hours}:${minutes}`;
+
+        // Initialize End Time
+        if (this.selectedAppointment.end) {
+            const endDt = new Date(this.selectedAppointment.end);
+            const endH = endDt.getHours().toString().padStart(2, '0');
+            const endM = endDt.getMinutes().toString().padStart(2, '0');
+            this.editEndTime = `${endH}:${endM}`;
+        } else {
+            // Fallback
+            const endDt = new Date(this.editDate.getTime() + 60 * 60 * 1000);
+            const endH = endDt.getHours().toString().padStart(2, '0');
+            const endM = endDt.getMinutes().toString().padStart(2, '0');
+            this.editEndTime = `${endH}:${endM}`;
+        }
+
+        this.editStatus = this.selectedAppointment.status || 'CONFIRMED'; // Default if null
         this.editNotes = this.selectedAppointment.extendedProps?.notes || '';
         this.editTypeId = this.selectedAppointment.extendedProps?.appointmentType?.id || null;
     }
@@ -329,94 +860,176 @@ export class BookingComponent implements OnInit {
         this.isEditMode = false;
         this.editBarberId = null;
         this.editDate = null;
+        this.editDate = null;
         this.editTime = '';
+        this.editStatus = '';
     }
 
     saveAppointment(): void {
-        if (!this.selectedAppointment || !this.editDate || !this.editTime) {
-            alert('Please fill in all fields.');
+        if (!this.selectedAppointment) return;
+
+        this.isSaving = true;
+
+        if (this.editDate && this.editTime) {
+            const [hours, minutes] = this.editTime.split(':').map(Number);
+            const newDateTime = new Date(this.editDate);
+            newDateTime.setHours(hours, minutes, 0, 0);
+
+            const updateData: any = {
+                barberId: this.editBarberId,
+                startTime: this.formatDateForBackend(newDateTime.toISOString()),
+                notes: this.editNotes,
+                appointmentTypeId: this.editTypeId,
+                status: this.editStatus
+            };
+
+            // Handle End Time
+            if (this.editEndTime) {
+                const endCombinedDate = new Date(this.editDate);
+                const [endHours, endMinutes] = this.editEndTime.split(':');
+                endCombinedDate.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
+
+                // Handle day rollover if needed
+                if (endCombinedDate <= newDateTime) {
+                    endCombinedDate.setDate(endCombinedDate.getDate() + 1);
+                }
+                updateData.endTime = this.formatDateForBackend(endCombinedDate.toISOString());
+            }
+
+            console.log('Updating Appointment Payload:', updateData);
+            console.log('Edit End Time Input:', this.editEndTime);
+
+            this.appointmentService.updateAppointment(this.selectedAppointment.id, updateData).subscribe({
+                next: () => {
+                    this.snackBar.open('Appointment updated successfully!', 'Close', { duration: 3000 });
+                    this.cancelEdit();
+                    this.closeBookingModal(); // Corrected from closeappointmentDetail()
+                    this.refreshAppointments();
+                    this.isSaving = false;
+                },
+                error: err => {
+                    console.error('Error updating appointment:', err);
+                    this.snackBar.open('Failed to update: ' + (err.error?.message || err.message), 'Close', { duration: 3000 });
+                    this.isSaving = false;
+                }
+            });
+        }
+    }
+
+    refreshAppointments() {
+        if (this.selectedBarberId === 0) {
+            this.loadAllAppointments();
+        } else if (this.selectedBarberId) {
+            this.loadBarberAppointments(this.selectedBarberId);
+        }
+    }
+
+
+
+    submitBooking() {
+        if (this.isSaving) return; // Prevent double submission
+
+        if (!this.bookingBarberId || !this.bookingDate || !this.bookingTime || !this.bookingTypeId) {
+            this.snackBar.open('Por favor complete todos los campos obligatorios.', 'Close', { duration: 3000 });
             return;
         }
 
         this.isSaving = true;
 
-        // Combine date and time
-        const [hours, minutes] = this.editTime.split(':').map(Number);
-        const newDateTime = new Date(this.editDate);
-        newDateTime.setHours(hours, minutes, 0, 0);
+        // Validate Client/Guest
+        if (!this.isLoggedIn) {
+            // For Admin creating booking:
+            if (this.isAdmin) {
+                if (!this.isGuestBooking && !this.selectedClientId) {
+                    this.snackBar.open('Por favor seleccione un cliente o cambie a modo Invitado.', 'Close', { duration: 3000 });
+                    this.isSaving = false;
+                    return;
+                }
+                if (this.isGuestBooking && (!this.bookingGuestName || !this.bookingGuestEmail)) {
+                    this.snackBar.open('Por favor ingrese nombre y correo del invitado.', 'Close', { duration: 3000 });
+                    this.isSaving = false;
+                    return;
+                }
+            } else {
+                // Public Guest
+                if (!this.bookingGuestName || !this.bookingGuestEmail) {
+                    this.snackBar.open('Por favor ingrese su nombre y correo.', 'Close', { duration: 3000 });
+                    this.isSaving = false;
+                    return;
+                }
+            }
+        }
 
-        const updateData = {
-            barberId: this.editBarberId,
-            startTime: this.formatDateForBackend(newDateTime.toISOString()),
-            notes: this.editNotes,
-            appointmentTypeId: this.editTypeId
+        const [hours, minutes] = this.bookingTime.split(':').map(Number);
+        const finalDate = new Date(this.bookingDate);
+        finalDate.setHours(hours, minutes, 0, 0);
+        const formattedDate = this.formatDateForBackend(finalDate.toISOString());
+
+        // Calculate End Time for New Appointment
+        let endTimeCombined: Date | null = null;
+        if (this.bookingEndTime) {
+            const [endH, endM] = this.bookingEndTime.split(':').map(Number);
+            endTimeCombined = new Date(this.bookingDate);
+            endTimeCombined.setHours(endH, endM, 0, 0);
+            // Handle rollover
+            if (endTimeCombined <= finalDate) {
+                endTimeCombined.setDate(endTimeCombined.getDate() + 1);
+            }
+        }
+
+        const appointment: any = {
+            barberId: this.bookingBarberId,
+            startTime: formattedDate,
+            endTime: endTimeCombined ? this.formatDateForBackend(endTimeCombined.toISOString()) : null,
+            appointmentTypeId: this.bookingTypeId,
+            notes: this.bookingNotes
         };
 
-        this.appointmentService.updateAppointment(this.selectedAppointment.id, updateData).subscribe({
-            next: () => {
-                alert('Appointment updated successfully!');
-                this.cancelEdit();
-                this.closeAppointmentDetail();
-                // Reload appointments
-                if (this.selectedBarberId === 0) {
-                    this.loadAllAppointments();
-                } else if (this.selectedBarberId) {
-                    this.loadBarberAppointments(this.selectedBarberId);
+        if (this.isLoggedIn) {
+            if (this.isAdmin) {
+                if (this.isGuestBooking) {
+                    // Guest Booking by Admin
+                    appointment.guestName = this.bookingGuestName;
+                    appointment.guestEmail = this.bookingGuestEmail;
+                    appointment.guestPhone = this.bookingGuestPhone;
+                    appointment.userId = null; // Explicitly null to trigger guest logic in backend
+                } else {
+                    // Registered Client Booking by Admin
+                    // BE assumes if userId is present it's that user? Or we send 'clientId'?
+                    // Checking backend would be ideal. Assuming 'userId' field in DTO allows setting specific user.
+                    appointment.userId = this.selectedClientId;
                 }
+            } else {
+                // Regular User booking themselves (Handled by backend usually pulling from token, but we can send ID)
+                // Backend usually gets user from token.
+                const user = this.storageService.getUser();
+                appointment.userId = user.id;
+            }
+        } else {
+            // Public Guest
+            appointment.clientName = this.bookingGuestName;
+            appointment.clientEmail = this.bookingGuestEmail;
+            appointment.clientPhone = this.bookingGuestPhone;
+        }
+
+        const request$ = this.isLoggedIn ?
+            this.appointmentService.createAppointment(appointment) :
+            this.appointmentService.createPublicAppointment(appointment);
+
+        request$.subscribe({
+            next: (res) => {
+                this.snackBar.open('Cita agendada con éxito!', 'OK', { duration: 3000 });
+                this.closeBookingModal();
+                this.refreshAppointments();
                 this.isSaving = false;
             },
-            error: err => {
-                console.error('Error updating appointment:', err);
-                alert('Failed to update appointment: ' + (err.error?.message || err.message));
+            error: (err) => {
+                console.error(err);
+                this.snackBar.open('Error al agendar la cita. Intente nuevamente.', 'Close', { duration: 3000 });
                 this.isSaving = false;
             }
         });
     }
-
-    handleDateClick(arg: any) {
-        console.log('handleDateClick called:', arg);
-        console.log('isLoggedIn:', this.isLoggedIn);
-        console.log('selectedBarberId:', this.selectedBarberId);
-
-        if (!this.selectedBarberId || this.selectedBarberId === 0) {
-            alert('Please select a specific barber first.');
-            return;
-        }
-
-        // Get the date string - different property names for dateClick vs select
-        const dateStr = arg.dateStr || arg.startStr;
-        console.log('dateStr:', dateStr);
-
-        if (!dateStr) {
-            console.error('No date string found in event', arg);
-            return;
-        }
-
-        // Format date without timezone for backend
-        const formattedDate = this.formatDateForBackend(dateStr);
-
-        if (this.isLoggedIn) {
-            // Logged in user - book directly
-            if (confirm('Would you like to book an appointment at ' + dateStr + '?')) {
-                const user = this.storageService.getUser();
-                const appointment = {
-                    userId: user.id,
-                    barberId: this.selectedBarberId,
-                    startTime: formattedDate
-                };
-                this.bookAppointment(appointment);
-            }
-        } else {
-            // Guest user - show form to collect info
-            console.log('Setting showGuestForm = true');
-            this.selectedTime = dateStr;
-            this.showGuestForm = true;
-            console.log('showGuestForm is now:', this.showGuestForm);
-            // Force Angular to detect change because FullCalendar runs outside of zone
-            this.cdr.detectChanges();
-        }
-    }
-
     private formatDateForBackend(dateStr: string): string {
         const date = new Date(dateStr);
         const year = date.getFullYear();
@@ -428,81 +1041,13 @@ export class BookingComponent implements OnInit {
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     }
 
-    submitGuestBooking(): void {
-        console.log('submitGuestBooking called', {
-            guestName: this.guestName,
-            guestEmail: this.guestEmail,
-            selectedTime: this.selectedTime,
-            selectedBarberId: this.selectedBarberId
-        });
-
-        if (!this.guestName || !this.guestEmail) {
-            alert('Please enter your name and email.');
-            return;
-        }
-
-        const formattedDate = this.formatDateForBackend(this.selectedTime!);
-        console.log('Formatted date:', formattedDate);
-
-        const appointment = {
-            barberId: this.selectedBarberId,
-            startTime: formattedDate,
-            guestName: this.guestName,
-            guestEmail: this.guestEmail,
-            guestPhone: this.guestPhone
-        };
-
-        console.log('Sending appointment:', appointment);
-
-        // Use public appointment for guests (no auth)
-        this.appointmentService.createPublicAppointment(appointment).subscribe({
-            next: data => {
-                console.log('Booking success:', data);
-                alert('Appointment booked successfully!');
-                this.showGuestForm = false;
-                this.cancelGuestBooking();
-                this.loadBarberAppointments(this.selectedBarberId!);
-                this.cdr.detectChanges(); // Force UI update
-            },
-            error: err => {
-                console.error('Booking error:', err);
-                alert('Failed to book appointment. ' + (err.error?.message || err.message || 'Please try again.'));
-            }
-        });
-    }
-
-    cancelGuestBooking(): void {
-        this.showGuestForm = false;
-        this.selectedTime = null;
-        this.guestName = '';
-        this.guestEmail = '';
-        this.guestPhone = '';
-    }
-
-    private bookAppointment(appointment: any): void {
-        this.appointmentService.createAppointment(appointment).subscribe({
-            next: data => {
-                alert('Appointment booked successfully!');
-                this.showGuestForm = false;
-                this.cancelGuestBooking();
-                this.loadBarberAppointments(this.selectedBarberId!);
-            },
-            error: err => {
-                console.error(err);
-                alert('Failed to book appointment. ' + (err.error?.message || ''));
-            }
-        });
-    }
-
     loadAppointmentForEdit(appointmentId: number): void {
-        // Workaround: Load all appointments and find the one we need
-        // This works with existing endpoints until backend is restarted with new GET /{id} endpoint
         this.appointmentService.getAppointments().subscribe({
             next: (appointments: any[]) => {
                 const appointment = appointments.find((apt: any) => apt.id === appointmentId);
 
                 if (!appointment) {
-                    alert('Appointment not found.');
+                    this.snackBar.open('Appointment not found.', 'Close', { duration: 3000 });
                     return;
                 }
 
@@ -533,13 +1078,13 @@ export class BookingComponent implements OnInit {
                         }
                     };
                     this.showAppointmentDetail = true;
-                    this.enterEditMode();
+                    this.isEditMode = false; // Ensure we start in View mode
                     this.cdr.detectChanges();
                 }, 500);
             },
             error: (err: any) => {
                 console.error('Error loading appointments:', err);
-                alert('Failed to load appointment for editing. Please make sure you are logged in as admin.');
+                this.snackBar.open('Failed to load appointment for editing. Please make sure you are logged in as admin.', 'Close', { duration: 3000 });
             }
         });
     }

@@ -18,8 +18,8 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class LoginComponent implements OnInit {
     form: any = {
-        email: null,
-        password: null
+        email: 'admin@barbershop.com',
+        password: '123456'
     };
     isLoggedIn = false;
     isLoginFailed = false;
@@ -32,7 +32,11 @@ export class LoginComponent implements OnInit {
         if (this.storageService.isLoggedIn()) {
             this.isLoggedIn = true;
             this.roles = this.storageService.getUser().roles;
-            this.router.navigate(['/home']);
+            if (this.authService.isAdmin()) {
+                this.router.navigate(['/admin']);
+            } else {
+                this.router.navigate(['/home']);
+            }
         }
     }
 
@@ -46,10 +50,16 @@ export class LoginComponent implements OnInit {
                 this.isLoginFailed = false;
                 this.isLoggedIn = true;
                 this.roles = this.storageService.getUser().roles;
-                this.router.navigate(['/home']);
+
+                if (this.authService.isAdmin()) {
+                    this.router.navigate(['/admin']);
+                } else {
+                    this.router.navigate(['/home']);
+                }
             },
             error: err => {
-                this.errorMessage = err.error.message;
+                console.error('Error de autenticación:', err);
+                this.errorMessage = err.error?.message || err.message || 'Error al ingresar';
                 this.isLoginFailed = true;
             }
         });

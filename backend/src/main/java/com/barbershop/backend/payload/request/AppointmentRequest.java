@@ -1,7 +1,6 @@
 package com.barbershop.backend.payload.request;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data

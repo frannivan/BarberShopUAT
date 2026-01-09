@@ -1,6 +1,7 @@
 package com.barbershop.backend.model;
 
 import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,17 +21,44 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)
     private String name;
 
+    private String phone;
+
+    private String gender;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    public User(String email, String password, String name, Role role) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+    }
+
+    // Constructor with phone
+    public User(Long id, String email, String password, String name, Role role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+    }
+
     public enum Role {
         USER,
+        CLIENTE,
         ADMIN,
-        BARBER
+        BARBER,
+        reception, // lowercase to match potential frontend values or just standardization? keeping
+                   // uppercase usually better but user said "recepcion"
+        RECEPTION,
+        ADMIN_BARBER
     }
 }

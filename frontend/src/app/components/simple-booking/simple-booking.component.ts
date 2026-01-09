@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +22,7 @@ import { ServiceTypeService } from '../../services/service-type.service';
     standalone: true,
     imports: [
         CommonModule,
+        DatePipe,
         FormsModule,
         MatCardModule,
         MatButtonModule,

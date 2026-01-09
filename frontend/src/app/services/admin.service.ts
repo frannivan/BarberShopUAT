@@ -26,12 +26,20 @@ export class AdminService {
         return this.http.get(API_URL + 'barbers', { headers: this.getHeaders() });
     }
 
-    createBarber(barber: any): Observable<any> {
-        return this.http.post(API_URL + 'barbers', barber, { headers: this.getHeaders() });
+    saveUser(user: any): Observable<any> {
+        return this.http.post(API_URL + 'users', user, { headers: this.getHeaders() });
     }
 
-    createAdmin(admin: any): Observable<any> {
-        return this.http.post(API_URL + 'admins', admin, { headers: this.getHeaders() });
+    updateUser(id: number, user: any): Observable<any> {
+        return this.http.put(API_URL + 'users/' + id, user, { headers: this.getHeaders() });
+    }
+
+    deleteUser(id: number): Observable<any> {
+        return this.http.delete(API_URL + 'users/' + id, { headers: this.getHeaders() });
+    }
+
+    toggleBarberStatus(id: number): Observable<any> {
+        return this.http.put(`${environment.apiUrl}/barbers/${id}/status`, {}, { headers: this.getHeaders() });
     }
 }
 

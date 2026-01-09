@@ -5,12 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@Data
+@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
@@ -23,22 +27,19 @@ public class UserDetailsImpl implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String email, String password,
-            Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
-        this.username = email;
-        this.email = email;
-        this.password = password;
-        this.authorities = authorities;
-    }
-
     public static UserDetailsImpl build(User user) {
+        String roleName = user.getRole().name();
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName;
+        }
+
         List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(user.getRole().name()));
+                new SimpleGrantedAuthority(roleName));
 
         return new UserDetailsImpl(
                 user.getId(),
-                user.getEmail(),
+                user.getEmail(), // username
+                user.getEmail(), // email
                 user.getPassword(),
                 authorities);
     }
@@ -48,24 +49,7 @@ public class UserDetailsImpl implements UserDetails {
         return authorities;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
+    // Default true for others
     @Override
     public boolean isAccountNonExpired() {
         return true;

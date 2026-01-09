@@ -1,136 +1,494 @@
-<div class="admin-container">
-    <div class="stats-section">
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>Statistics</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <p>Total Users: {{ stats.users }}</p>
-                <p>Total Appointments: {{ stats.appointments }}</p>
-                <p>Total Barbers: {{ stats.barbers }}</p>
-            </mat-card-content>
-        </mat-card>
+<div class="admin-container animate-fade-in">
+    <div class="header-section mb-4">
+        <div class="d-flex justify-content-between align-items-end">
+            <div>
+                <h1 class="page-title-lux mb-1">Admin Dashboard</h1>
+                <p class="text-subtitle">Gestión centralizada de citas, personal y clientes</p>
+            </div>
+            <div class="stats-container-premium">
+                <div class="stats-badge-premium">
+                    <span class="count">{{ stats.users }}</span>
+                    <span class="label">Usuarios</span>
+                </div>
+                <div class="stats-badge-premium">
+                    <span class="count">{{ todayAppointmentsCount }}</span>
+                    <span class="label">Citas Hoy</span>
+                </div>
+                <div class="stats-badge-premium">
+                    <span class="count">{{ activeBarbersCount }}</span>
+                    <span class="label">Barberos Activos</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <mat-tab-group>
+    <mat-tab-group (selectedTabChange)="onTabChange($event)">
         <!-- Appointments Tab -->
-        <mat-tab label="Appointments">
+        <mat-tab label="Citas">
             <div class="tab-content">
-                <mat-card>
-                    <mat-card-header>
-                        <mat-card-title>All Appointments</mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <mat-list>
-                            <mat-list-item *ngFor="let appointment of appointments">
-                                <span matListItemTitle>
-                                    {{ appointment.startTime | date:'medium' }} - {{ appointment.endTime |
-                                    date:'shortTime' }}
-                                </span>
-                                <span matListItemLine>
-                                    Client: {{ appointment.user?.name || appointment.guestName }} ({{
-                                    appointment.user?.email || appointment.guestEmail }})
-                                </span>
-                                <span matListItemLine>
-                                    Barber: {{ appointment.barber?.name }}
-                                </span>
-                                <span matListItemLine>Status: {{ appointment.status }}</span>
-                                <button mat-icon-button color="warn" (click)="cancelAppointment(appointment.id)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </mat-list-item>
-                            <mat-list-item *ngIf="appointments.length === 0">
-                                <span matListItemTitle>No appointments</span>
-                            </mat-list-item>
-                        </mat-list>
-                    </mat-card-content>
-                </mat-card>
+                <div class="p-4 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h2 class="section-title mb-0">Gestión de Citas</h2>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="search-box-lux mx-auto" style="width: 100%; max-width: 350px;">
+                                <mat-form-field appearance="outline" class="premium-search status-select">
+                                    <mat-label>Buscar Cita</mat-label>
+                                    <input matInput [(ngModel)]="aptSearchTerm" placeholder="Cliente o Barbero">
+                                    <mat-icon matSuffix>search</mat-icon>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end" style="text-align: right;">
+                            <button class="btn-action-lux" style="background: var(--gradient-red); padding: 10px 20px;"
+                                (click)="navigateToBooking()">
+                                <i class="fas fa-calendar-plus mr-2"></i> Nueva Cita
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-glass-premium shadow-lg">
+                    <div class="table-responsive">
+                        <table class="table mb-0 premium-crm-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-datetime">FECHA Y HORA</th>
+                                    <th class="col-apt-client">CLIENTE</th>
+                                    <th class="col-barber">BARBERO</th>
+                                    <th class="col-status">ESTADO</th>
+                                    <th class="col-apt-actions text-right">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let appointment of filteredAppointments" class="premium-row"
+                                    (click)="openEditAppointmentModal(appointment)" style="cursor: pointer;">
+                                    <td>
+                                        <div class="user-icon-lux"><i class="fas fa-calendar-check"></i></div>
+                                        <div class="item-main-text">{{ appointment.startTime | date:'medium' }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="item-main-text">{{ appointment.user?.name || appointment.guestName
+                                            }}</div>
+                                        <small class="item-sub-text">{{ appointment.user?.email || 'Guest' }}</small>
+                                    </td>
+                                    <td><span class="role-badge">{{ appointment.barber?.name }}</span></td>
+                                    <td>
+                                        <span class="status-indicator-premium" [ngClass]="appointment.status">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button class="btn-action-lux warn"
+                                            (click)="$event.stopPropagation(); cancelAppointment(appointment.id)"
+                                            title="Cancelar Cita">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="appointments.length === 0">
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="empty-state-premium">
+                                            <i class="fas fa-calendar-times mb-3"></i>
+                                            <p>No hay citas registradas.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </mat-tab>
 
-        <!-- Barber Management Tab -->
-        <mat-tab label="Manage Barbers">
-            <div class="tab-content">
-                <mat-card class="form-card">
-                    <mat-card-header>
-                        <mat-card-title>Add New Barber</mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Name *</mat-label>
-                            <input matInput [(ngModel)]="newBarber.name" placeholder="Barber name">
-                        </mat-form-field>
+        <!-- Personal Management Tab -->
+        <mat-tab label="Personal">
+            <div class="tab-content" style="position: relative;">
+                <div class="p-4 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h2 class="section-title mb-0">Directorio de Personal</h2>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="search-box-lux mx-auto" style="width: 100%; max-width: 350px;">
+                                <mat-form-field appearance="outline" class="premium-search status-select">
+                                    <mat-label>Filtrar por Rol</mat-label>
+                                    <mat-select [(ngModel)]="selectedRoleFilter">
+                                        <mat-option value="ALL">Todos</mat-option>
+                                        <mat-option *ngFor="let role of staffRoles" [value]="role">{{ role
+                                            }}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end" style="text-align: right;">
+                            <button class="btn-action-lux" style="background: var(--gradient-red); padding: 10px 20px;"
+                                (click)="openUserModal()">
+                                <i class="fas fa-user-plus mr-2"></i> Nuevo Personal
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Email *</mat-label>
-                            <input matInput type="email" [(ngModel)]="newBarber.email" placeholder="Login email">
-                        </mat-form-field>
+                <div class="card-glass-premium shadow-lg">
+                    <div class="table-responsive">
+                        <table class="table mb-0 premium-crm-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-user">USUARIO</th>
+                                    <th class="col-email">EMAIL</th>
+                                    <th class="col-phone">TELÉFONO</th>
+                                    <th class="col-role">ROL</th>
+                                    <th class="col-status">ESTADO</th>
+                                    <th class="col-actions-sm">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let user of staffMembers" class="premium-row">
+                                    <td>
+                                        <div class="user-icon-lux">
+                                            <i class="fas"
+                                                [ngClass]="user.role === 'BARBER' ? 'fa-cut' : (user.role === 'ADMIN' ? 'fa-user-shield' : 'fa-user')"></i>
+                                        </div>
+                                        <div class="item-main-text">{{ user.name }}</div>
+                                    </td>
 
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Password *</mat-label>
-                            <input matInput type="password" [(ngModel)]="newBarber.password"
-                                placeholder="Login password">
-                        </mat-form-field>
+                                    <td>
+                                        <div class="item-sub-text">{{ user.email }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="item-sub-text">{{ user.phone || '-' }}</div>
+                                    </td>
+                                    <td><span class="role-badge">{{ user.role }}</span></td>
+                                    <td class="center">
+                                        <!-- Dynamic Neon Switch for ALL users -->
+                                        <!-- Simple Status Indicator -->
+                                        <div class="d-flex align-items-center">
+                                            <span class="status-indicator-premium"
+                                                [ngClass]="isBarberActive(user) ? 'NEW' : 'DISCARDED'">
+                                                {{ isBarberActive(user) ? 'Activo' : 'Inactivo' }}
+                                            </span>
+                                        </div>
 
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Photo URL</mat-label>
-                            <input matInput [(ngModel)]="newBarber.photoUrl" placeholder="Optional photo URL">
-                        </mat-form-field>
-                    </mat-card-content>
-                    <mat-card-actions>
-                        <button mat-raised-button color="primary" (click)="createBarber()">Add Barber</button>
-                    </mat-card-actions>
-                </mat-card>
 
-                <mat-card>
-                    <mat-card-header>
-                        <mat-card-title>Current Barbers</mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <mat-list>
-                            <mat-list-item *ngFor="let barber of barbers">
-                                <span matListItemTitle>{{ barber.name }}</span>
-                                <span matListItemLine *ngIf="barber.user">Login: {{ barber.user.email }}</span>
-                                <span matListItemLine *ngIf="!barber.user">No login account</span>
-                            </mat-list-item>
-                            <mat-list-item *ngIf="barbers.length === 0">
-                                <span matListItemTitle>No barbers registered</span>
-                            </mat-list-item>
-                        </mat-list>
-                    </mat-card-content>
-                </mat-card>
+                                    <td>
+                                        <div class="d-flex justify-content-start gap-2">
+                                            <button class="btn-action-lux btn-toggle mr-2" *ngIf="isBarber(user)"
+                                                [ngClass]="isBarberActive(user) ? 'active' : 'inactive'"
+                                                (click)="toggleBarberStatus(user)"
+                                                [title]="isBarberActive(user) ? 'Desactivar Barbero' : 'Activar Barbero'">
+                                                <i class="fas"
+                                                    [ngClass]="isBarberActive(user) ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                                            </button>
+
+                                            <button class="btn-action-lux mr-2" (click)="startEditUser(user)"
+                                                title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-action-lux warn" (click)="deleteUser(user.id)"
+                                                title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="staffMembers.length === 0">
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="empty-state-premium">
+                                            <i class="fas fa-users-slash mb-3"></i>
+                                            <p>No hay personal registrado.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </mat-tab>
+        <!-- Client History (CRM) Tab -->
+        <mat-tab label="Historial de Clientes">
+            <div class="tab-content" style="position: relative;">
+                <div class="row justify-content-center">
+                    <div class="col-md-11">
+                        <div class="card-glass-premium shadow-lg animate-fade-in">
+                            <div class="p-4 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <h2 class="section-title mb-0">Directorio de Clientes</h2>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="search-box-lux mx-auto" style="width: 100%; max-width: 350px;">
+                                            <mat-form-field appearance="outline" class="premium-search status-select">
+                                                <mat-label>Buscar Cliente</mat-label>
+                                                <input matInput [(ngModel)]="crmSearchTerm"
+                                                    placeholder="Nombre o Email">
+                                                <mat-icon matSuffix>search</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end" style="text-align: right;">
+                                        <button class="btn-action-lux"
+                                            style="background: var(--gradient-red); padding: 10px 20px;"
+                                            (click)="openCreateClientModal()">
+                                            <i class="fas fa-plus mr-1"></i> Nuevo Cliente
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Admin Management Tab -->
-        <mat-tab label="Manage Admins">
-            <div class="tab-content">
-                <mat-card class="form-card">
-                    <mat-card-header>
-                        <mat-card-title>Add New Admin</mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Name *</mat-label>
-                            <input matInput [(ngModel)]="newAdmin.name" placeholder="Admin name">
-                        </mat-form-field>
 
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Email *</mat-label>
-                            <input matInput type="email" [(ngModel)]="newAdmin.email" placeholder="Login email">
-                        </mat-form-field>
 
-                        <mat-form-field appearance="fill" class="full-width">
-                            <mat-label>Password *</mat-label>
-                            <input matInput type="password" [(ngModel)]="newAdmin.password"
-                                placeholder="Login password">
-                        </mat-form-field>
-                    </mat-card-content>
-                    <mat-card-actions>
-                        <button mat-raised-button color="primary" (click)="createAdmin()">Add Admin</button>
-                    </mat-card-actions>
-                </mat-card>
+
+                            <div class="table-scroll-container">
+                                <table class="table mb-0 premium-crm-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-client">CLIENTE</th>
+                                            <th class="col-contact">CONTACTO</th>
+                                            <th class="col-phone-crm">TELÉFONO</th>
+                                            <th class="col-actions text-right">ACCIONES</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let client of uniqueClients; trackBy: trackByClient"
+                                            class="premium-row">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="user-icon-lux">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div class="item-main-text">{{ client.name }}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="item-sub-text">{{ client.email }}</div>
+                                            </td>
+                                            <td>
+                                                <div class="item-sub-text">{{ client.phone || '-' }}</div>
+                                            </td>
+                                            <td class="text-right">
+                                                <button type="button" class="btn-action-lux"
+                                                    (click)="$event.stopPropagation(); viewClientHistory(client)"
+                                                    title="Ver Historial">
+                                                    <i class="fas fa-eye mr-2"></i> Ver Detalle
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr *ngIf="uniqueClients.length === 0">
+                                            <td colspan="4" class="text-center py-5">
+                                                <div class="empty-state-premium">
+                                                    <i class="fas fa-search mb-3"></i>
+                                                    <p>No se encontraron clientes.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </mat-tab>
     </mat-tab-group>
+
+    <!-- Appointment Edit Modal Overlay -->
+    <div class="user-modal-overlay" *ngIf="showAppointmentModal"
+        style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index:999; display:flex; justify-content:center; align-items:center;"
+        (dblclick)="closeAppointmentModal()">
+
+        <mat-card class="user-modal-card" (click)="$event.stopPropagation()"
+            style="width: 600px; max-height: 90vh; overflow-y: auto; background: var(--secondary-dark); border: 1px solid var(--border-subtle); position: relative;">
+
+            <button class="close-btn-sexy" (click)="closeAppointmentModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+
+            <mat-card-header>
+                <mat-card-title>Editar Cita</mat-card-title>
+                <mat-card-subtitle class="text-white-50">Gestionar detalles de la reserva</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content class="pt-3">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Barbero</mat-label>
+                            <mat-select [(ngModel)]="editBarberId">
+                                <mat-option *ngFor="let b of barbers" [value]="b.id">{{ b.name }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Servicio (Tipo)</mat-label>
+                            <mat-select [(ngModel)]="editTypeId">
+                                <mat-option *ngFor="let t of serviceTypes" [value]="t.id">{{ t.name }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Fecha</mat-label>
+                            <input matInput [matDatepicker]="editDistPicker" [(ngModel)]="editDate">
+                            <mat-datepicker-toggle matSuffix [for]="editDistPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #editDistPicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Hora Inicio</mat-label>
+                            <input matInput type="time" [(ngModel)]="editTime">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Hora Fin</mat-label>
+                            <input matInput type="time" [(ngModel)]="editEndTime">
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row" *ngIf="editGuestName || editGuestEmail">
+                    <div class="col-12 mb-2">
+                        <h5 class="text-white mt-2">Datos del Cliente (Invitado)</h5>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Nombre</mat-label>
+                            <input matInput [(ngModel)]="editGuestName">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Email</mat-label>
+                            <input matInput [(ngModel)]="editGuestEmail">
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Estatus</mat-label>
+                            <mat-select [(ngModel)]="editStatus">
+                                <mat-option value="CONFIRMED">Confirmada</mat-option>
+                                <mat-option value="PENDING">Pendiente</mat-option>
+                                <mat-option value="COMPLETED">Completada</mat-option>
+                                <mat-option value="CANCELLED">Cancelada</mat-option>
+                                <mat-option value="NOSHOW">No Asistió</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-12 mb-2">
+                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-label>Notas</mat-label>
+                            <textarea matInput [(ngModel)]="editNotes" rows="2"></textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+            </mat-card-content>
+
+            <mat-card-actions align="end">
+                <button mat-button (click)="closeAppointmentModal()">Cancelar</button>
+                <button mat-raised-button color="primary" (click)="saveAppointmentChanges()">Guardar Cambios</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <!-- User Modal Overlay -->
+    <!-- Moved outside the tab group to ensure it works from any tab -->
+    <div class="user-modal-overlay" *ngIf="showUserModal"
+        style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index:999; display:flex; justify-content:center; align-items:center;"
+        (dblclick)="closeUserModal()"> <!-- Close on backdrop double click -->
+        <!-- Modal Card -->
+        <mat-card class="user-modal-card" (click)="$event.stopPropagation()"
+            style="width: 500px; max-height: 90vh; overflow-y: auto; background: var(--secondary-dark); border: 1px solid var(--border-subtle); position: relative;">
+
+            <button class="close-btn-sexy" (click)="closeUserModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+            <mat-card-header>
+                <mat-card-title>{{ isEditingUser ? 'Editar ' + (modalContext === 'client' ? 'Cliente' : 'Personal') :
+                    'Agregar ' + (modalContext === 'client' ? 'Cliente' : 'Nuevo Personal') }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="pt-3">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput [(ngModel)]="newUser.name" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput [(ngModel)]="newUser.email" required email>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width" *ngIf="!isEditingUser">
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput [(ngModel)]="newUser.password" type="password" required>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width" *ngIf="isEditingUser">
+                    <mat-label>Nueva Contraseña (Opcional)</mat-label>
+                    <input matInput [(ngModel)]="newUser.password" type="password"
+                        placeholder="Dejar en blanco para mantener actual">
+                </mat-form-field>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Teléfono</mat-label>
+                            <input matInput [(ngModel)]="newUser.phone">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Género</mat-label>
+                            <mat-select [(ngModel)]="newUser.gender">
+                                <mat-option value="Male">Masculino</mat-option>
+                                <mat-option value="Female">Femenino</mat-option>
+                                <mat-option value="Other">Otro</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Rol</mat-label>
+                    <mat-select [(ngModel)]="newUser.role" required
+                        [disabled]="!isEditingUser && availableRoles.length === 1">
+                        <mat-option *ngFor="let r of availableRoles" [value]="r">{{ r }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Barber Specific Fields -->
+                <div *ngIf="newUser.role === 'BARBER' || newUser.role === 'ADMIN_BARBER'" class="barber-fields p-3 mb-3"
+                    style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <h4 class="mb-3" style="color: var(--text-white);">Perfil de Barbero</h4>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>URL de Foto</mat-label>
+                        <input matInput [(ngModel)]="newUser.photoUrl">
+                    </mat-form-field>
+                    <div class="d-flex align-items-center gap-2">
+                        <label style="color: var(--text-light);">Color de Calendario:</label>
+                        <input type="color" [(ngModel)]="newUser.color"
+                            style="height: 40px; width: 60px; border: none; cursor: pointer; background: transparent;">
+                    </div>
+                </div>
+
+            </mat-card-content>
+            <mat-card-actions align="end">
+                <button mat-button (click)="closeUserModal()">Cancelar</button>
+                <button mat-raised-button color="primary" (click)="saveUserForm()">Guardar</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
 </div>

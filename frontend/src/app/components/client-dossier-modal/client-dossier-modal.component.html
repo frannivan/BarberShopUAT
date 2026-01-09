@@ -1,0 +1,313 @@
+<div class="dossier-card" style="height: 85vh; display: flex; flex-direction: column;">
+    <!-- Header -->
+    <div class="dossier-header p-4"
+        style="background: linear-gradient(to right, rgba(231, 76, 60, 0.1), transparent); border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; position: relative;">
+        <!-- Close Button (Absolute) -->
+        <button mat-icon-button (click)="close()"
+            style="position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; line-height: 32px; z-index: 10;">
+            <mat-icon style="font-size: 18px;">close</mat-icon>
+        </button>
+
+        <div class="d-flex align-items-center w-100 pr-5">
+            <!-- Increased padding-right to 5 to safe-guard close button -->
+            <div class="client-avatar mr-4"
+                style="background: var(--gradient-red); color:#fff; width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.4); flex-shrink: 0;">
+                {{ client?.name?.charAt(0) }}
+            </div>
+
+            <div class="flex-grow-1" style="min-width: 0;">
+                <div class="d-flex align-items-center flex-wrap mb-2">
+                    <h2 class="mb-0 text-white mr-3"
+                        style="font-size: 1.8rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;"
+                        [matTooltip]="client?.name">{{ client?.name }}</h2>
+                    <span class="badge badge-success"
+                        style="background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.4); font-size: 0.75rem; padding: 4px 8px;">Active</span>
+                </div>
+
+                <div class="d-flex align-items-center flex-wrap gap-4 text-light-gray" style="font-size: 0.95rem;">
+                    <div class="d-flex align-items-center" [matTooltip]="client?.email" style="max-width: 300px;">
+                        <mat-icon
+                            style="font-size: 18px; height: 18px; width: 18px; margin-right: 6px; color: var(--accent-red);">email</mat-icon>
+                        <span class="truncate-text">{{ client?.email }}</span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <mat-icon
+                            style="font-size: 18px; height: 18px; width: 18px; margin-right: 6px; color: var(--accent-red);">phone</mat-icon>
+                        <span>{{ client?.phone || 'No phone' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dossier-content flex-grow-1" style="overflow-y: auto; padding: 20px;">
+        <!-- Stats Grid -->
+        <div class="stats-grid mb-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div class="stat-box p-3 text-center"
+                style="background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                <div class="text-gray" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Visits
+                </div>
+                <div class="text-white" style="font-size: 1.5rem; font-weight: bold;">{{ stats.totalAppointments }}
+                </div>
+            </div>
+            <div class="stat-box p-3 text-center"
+                style="background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                <div class="text-gray" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Last
+                    Visit</div>
+                <div class="text-white" style="font-size: 1rem; font-weight: bold; margin-top: 4px;">{{
+                    (stats.lastAppointment | date:'mediumDate') || 'Never' }}</div>
+            </div>
+            <div class="stat-box p-3 text-center"
+                style="background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                <div class="text-gray" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                    Favorite</div>
+                <div class="text-white truncate-text" style="font-size: 1rem; font-weight: bold; margin-top: 4px;">{{
+                    stats.preferredBarber }}</div>
+            </div>
+        </div>
+
+        <div class="row m-0">
+            <!-- Personal Info Column -->
+            <div class="col-md-4 pr-4 border-right" style="border-right: 1px solid var(--border-subtle);">
+                <div class="d-flex justify-content-between align-items-center mb-3"
+                    style="border-bottom: 2px solid var(--accent-red); padding-bottom: 5px;">
+                    <h4 class="text-white mb-0">Personal Data</h4>
+                    <button mat-icon-button (click)="isEditing ? saveProfile() : toggleEdit()" [disabled]="isLoading"
+                        [matTooltip]="isEditing ? 'Save Changes' : 'Edit Profile'">
+                        <mat-icon style="font-size: 1.2rem;">{{ isEditing ? 'check' : 'edit' }}</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="toggleEdit()" *ngIf="isEditing" color="warn" matTooltip="Cancel">
+                        <mat-icon style="font-size: 1.2rem;">close</mat-icon>
+                    </button>
+                </div>
+
+                <!-- Name Field -->
+                <div class="info-group mb-3" style="display: flex; flex-direction: column;">
+                    <div class="mb-1"><label class="text-gray"
+                            style="font-size: 0.8rem; display: block; margin: 0;">Name</label></div>
+                    <div *ngIf="!isEditing" class="text-white" style="min-height: 24px; display: block;">{{ client?.name
+                        }}</div>
+                    <div *ngIf="isEditing"><input type="text" [(ngModel)]="client.name"
+                            class="premium-input-inline w-100"></div>
+                </div>
+
+                <!-- Phone Field -->
+                <div class="info-group mb-3" style="display: flex; flex-direction: column;">
+                    <div class="mb-1"><label class="text-gray"
+                            style="font-size: 0.8rem; display: block; margin: 0;">Phone</label></div>
+                    <div *ngIf="!isEditing" class="text-white" style="min-height: 24px; display: block;">{{
+                        client?.phone || 'Not provided' }}</div>
+                    <div *ngIf="isEditing"><input type="text" [(ngModel)]="client.phone"
+                            class="premium-input-inline w-100"></div>
+                </div>
+
+                <!-- Gender Field -->
+                <div class="info-group mb-3" style="display: flex; flex-direction: column;">
+                    <div class="mb-1"><label class="text-gray"
+                            style="font-size: 0.8rem; display: block; margin: 0;">Gender</label></div>
+                    <div *ngIf="!isEditing" class="text-white" style="min-height: 24px; display: block;">{{
+                        client?.gender || 'Not specified' }}</div>
+                    <div *ngIf="isEditing">
+                        <select [(ngModel)]="client.gender" class="premium-input-inline w-100"
+                            style="background-color: #222;">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Email Field (Read Only) -->
+                <div class="info-group mb-3" style="display: flex; flex-direction: column;">
+                    <div class="mb-1"><label class="text-gray"
+                            style="font-size: 0.8rem; display: block; margin: 0;">Email</label></div>
+                    <div class="text-white truncate-text" [matTooltip]="client?.email"
+                        style="opacity: 0.8; display: block;">{{
+                        client?.email }}</div>
+                    <div *ngIf="isEditing" class="text-muted small mt-1">Email cannot be changed</div>
+                </div>
+
+                <div *ngIf="isEditing" class="mt-4 text-center">
+                    <span *ngIf="isLoading" class="text-accent small"><i class="fas fa-spinner fa-spin mr-2"></i>
+                        Saving...</span>
+                </div>
+            </div>
+
+            <!-- History Timeline Column -->
+            <div class="col-md-8 pl-4">
+                <h4 class="text-white mb-3"
+                    style="border-bottom: 2px solid var(--accent-red); display: inline-block; padding-bottom: 5px;">
+                    Appointment History</h4>
+
+                <div class="timeline" style="position: relative; padding-left: 20px;">
+                    <!-- Vertical Line -->
+                    <div
+                        style="position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px; background: var(--border-subtle);">
+                    </div>
+
+                    <div *ngFor="let apt of history" class="timeline-item mb-4"
+                        style="position: relative; cursor: pointer;" (click)="selectAppointment(apt)">
+                        <!-- Increased margin bottom -->
+                        <!-- Dot -->
+                        <div style="position: absolute; left: -24px; top: 15px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--secondary-dark);"
+                            [style.background]="apt.status === 'COMPLETED' ? '#2ecc71' : (apt.status === 'CANCELLED' ? '#e74c3c' : '#3498db')">
+                        </div>
+
+                        <div class="timeline-content p-3"
+                            style="background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border-subtle);">
+
+                            <!-- Line 1: Date/Time -->
+                            <div class="mb-2">
+                                <span class="text-white font-weight-bold" style="font-size: 1.1rem;">{{ apt.startTime |
+                                    date:'medium' }}</span>
+                            </div>
+
+                            <!-- Line 2: Barber & Status -->
+                            <div class="d-flex align-items-center flex-wrap text-gray" style="font-size: 0.95em;">
+                                <div class="mr-4">
+                                    <strong class="text-white">Barber:</strong> {{ apt.barber?.name }}
+                                </div>
+                                <div>
+                                    <strong class="text-white">Status:</strong>
+                                    <span
+                                        [ngClass]="{'text-success': apt.status === 'COMPLETED', 'text-primary': apt.status === 'BOOKED', 'text-danger': apt.status === 'CANCELLED'}"
+                                        class="ml-1 font-weight-bold">
+                                        {{ apt.status }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div *ngIf="apt.notes" class="mt-2 p-2"
+                                style="background: rgba(0,0,0,0.2); border-radius: 4px; font-size: 0.9rem; font-style: italic; color: #aaa;">
+                                "{{ apt.notes }}"
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="history.length === 0" class="text-center text-muted py-4">
+                        No appointment history found.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Detail Overlay -->
+        <div *ngIf="selectedAppointment" class="detail-overlay" (click)="clearSelection()"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 20; display: flex; align-items: center; justify-content: center; opacity: 0; animation: fadeIn 0.3s forwards;">
+
+            <div class="detail-card record-card" (click)="$event.stopPropagation()"
+                (dblclick)="$event.stopPropagation()"
+                style="width: 550px; background: #1a1a1a; border-radius: 4px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); transform: translateY(20px); animation: slideUp 0.3s forwards; position: relative;">
+
+                <!-- Status Strip -->
+                <div [style.background]="selectedAppointment.status === 'COMPLETED' ? '#2ecc71' : (selectedAppointment.status === 'CANCELLED' ? '#e74c3c' : '#3498db')"
+                    style="position: absolute; left: 0; top: 0; bottom: 0; width: 6px;"></div>
+
+                <!-- Header: Record ID & Actions -->
+                <div class="d-flex justify-content-between align-items-center p-4 pl-5 border-bottom"
+                    style="border-color: #333 !important;">
+                    <div>
+                        <div class="text-uppercase text-gray" style="font-size: 0.7rem; letter-spacing: 2px;">
+                            Appointment Record</div>
+                        <div class="text-white"
+                            style="font-family: monospace; font-size: 1.2rem; color: var(--accent-red);">
+                            #{{ selectedAppointment.id || 'REF-N/A' }}
+                        </div>
+                    </div>
+                    <button mat-icon-button (click)="clearSelection()" style="color: #666;">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+
+                <div class="p-5 pl-5 pt-4">
+                    <!-- Main Info Grid -->
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="text-gray d-block mb-1"
+                                style="font-size: 0.75rem; text-transform: uppercase;">Date & Time</label>
+                            <div class="text-white h5 mb-0" style="font-weight: 300;">
+                                {{ selectedAppointment.startTime | date:'mediumDate' }}
+                            </div>
+                            <div class="text-accent" style="font-size: 1.1rem; font-weight: bold;">
+                                {{ selectedAppointment.startTime | date:'shortTime' }}
+                                <span class="text-gray" style="font-weight: normal; font-size: 0.9rem;">- {{
+                                    selectedAppointment.endTime | date:'shortTime' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-gray d-block mb-1"
+                                style="font-size: 0.75rem; text-transform: uppercase;">Status</label>
+                            <div class="status-badge-outline" [ngClass]="{
+                                    'status-completed': selectedAppointment.status === 'COMPLETED', 
+                                    'status-booked': selectedAppointment.status === 'BOOKED', 
+                                    'status-cancelled': selectedAppointment.status === 'CANCELLED'
+                                }">
+                                {{ selectedAppointment.status }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Block -->
+                    <div class="service-block p-3 mb-4"
+                        style="background: rgba(255,255,255,0.03); border: 1px dashed #444; border-radius: 4px;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-gray text-uppercase small">Service Executed</span>
+                            <span class="text-white font-weight-bold"
+                                *ngIf="selectedAppointment.appointmentType?.price">
+                                ${{ selectedAppointment.appointmentType?.price }}
+                            </span>
+                        </div>
+                        <div class="text-white" style="font-size: 1.1rem;">
+                            {{ selectedAppointment.appointmentType?.name || selectedAppointment.serviceType?.name ||
+                            'Servicio Estándar' }}
+                        </div>
+                    </div>
+
+                    <!-- Staff & Notes -->
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="text-gray d-block mb-1"
+                                style="font-size: 0.75rem; text-transform: uppercase;">Professional</label>
+                            <div class="d-flex align-items-center">
+                                <div class="barber-avatar-mini mr-3"
+                                    style="width: 32px; height: 32px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #fff;">
+                                    {{ selectedAppointment.barber?.name?.charAt(0) }}
+                                </div>
+                                <div class="text-white">{{ selectedAppointment.barber?.name }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="text-gray d-block mb-1"
+                                style="font-size: 0.75rem; text-transform: uppercase;">Observations / Notes</label>
+                            <div class="notes-field p-3"
+                                style="background: #111; border-left: 2px solid #333; color: #ccc; font-family: monospace; font-size: 0.9rem; min-height: 60px;">
+                                {{ selectedAppointment.notes || 'No observations recorded for this appointment.' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer / Actions -->
+                <div class="p-3 bg-darker text-right border-top"
+                    style="background: #111; border-color: #333 !important;">
+                    <span class="text-gray small mr-2 font-italic">Record ID: {{ selectedAppointment.id }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</div>

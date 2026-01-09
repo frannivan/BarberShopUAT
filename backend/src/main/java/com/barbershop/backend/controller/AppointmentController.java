@@ -69,7 +69,7 @@ public class AppointmentController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+        if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return appointmentRepository.findAll();
         }
         return appointmentRepository.findByUserId(userDetails.getId());
@@ -77,6 +77,11 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<?> createAppointment(@RequestBody AppointmentRequest appointmentRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName(); // email/username
+
+        // ... (rest of method is same)
+
         // ... (rest of method is same)
         Barber barber = barberRepository.findById(appointmentRequest.getBarberId())
                 .orElseThrow(() -> new RuntimeException("Error: Barber not found."));
@@ -84,7 +89,13 @@ public class AppointmentController {
         Appointment appointment = new Appointment();
         appointment.setBarber(barber);
         appointment.setStartTime(appointmentRequest.getStartTime());
-        appointment.setEndTime(appointmentRequest.getStartTime().plusHours(1)); // Default 1 hour duration
+        // Fix End Time Logic
+        if (appointmentRequest.getEndTime() != null) {
+            appointment.setEndTime(appointmentRequest.getEndTime());
+        } else {
+            appointment.setEndTime(appointmentRequest.getStartTime().plusHours(1));
+        }
+
         appointment.setStatus(Appointment.Status.BOOKED);
 
         // Check if it's a registered user or a guest
@@ -110,6 +121,18 @@ public class AppointmentController {
                     .findById(appointmentRequest.getAppointmentTypeId())
                     .orElse(null); // Or default
             appointment.setAppointmentType(type);
+        }
+
+        // Set Audit Fields
+        appointment.setCreatedAt(LocalDateTime.now());
+        // Use existing authentication variable from top of method
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getName())) {
+            appointment.setCreatedBy(authentication.getName());
+            appointment.setCreationSource("WEB_APP_AUTH");
+        } else {
+            appointment.setCreatedBy("GUEST");
+            appointment.setCreationSource("WEB_APP_PUBLIC");
         }
 
         appointmentRepository.save(appointment);
@@ -165,7 +188,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/my-barber-appointments")
-    @PreAuthorize("hasAuthority('BARBER')")
+    @PreAuthorize("hasRole('BARBER')")
     public List<Appointment> getMyBarberAppointments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -187,7 +210,7 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<?> deleteAppointment(@PathVariable Long id) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Appointment not found."));
@@ -196,7 +219,7 @@ public class AppointmentController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         // Check if user is admin or the owner of the appointment
-        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         boolean isOwner = appointment.getUser() != null && appointment.getUser().getId().equals(userDetails.getId());
 
         if (!isAdmin && !isOwner) {
@@ -209,7 +232,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequest request) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Appointment not found."));
@@ -224,7 +247,16 @@ public class AppointmentController {
         // Update time if provided
         if (request.getStartTime() != null) {
             appointment.setStartTime(request.getStartTime());
-            appointment.setEndTime(request.getStartTime().plusHours(1));
+
+            // If EndTime is provided, use it. Otherwise, default to +1 hour.
+            if (request.getEndTime() != null) {
+                appointment.setEndTime(request.getEndTime());
+            } else {
+                appointment.setEndTime(request.getStartTime().plusHours(1));
+            }
+        } else if (request.getEndTime() != null) {
+            // Start time wasn't changed, but End Time was
+            appointment.setEndTime(request.getEndTime());
         }
 
         // Update fields if provided in request

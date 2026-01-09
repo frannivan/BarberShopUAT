@@ -1,4 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef, afterNextRender } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, afterNextRender } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { BarberService } from '../../services/barber.service';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -13,15 +16,23 @@ import { RouterModule } from '@angular/router';
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
+    private routerSubscription: Subscription | undefined;
     barbers: any[] = [];
     loading = true;
     error: string | null = null;
 
     constructor(
         private barberService: BarberService,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private router: Router
     ) {
+        // Force refresh when navigating to the same URL
+        this.routerSubscription = this.router.events.pipe(
+            filter(e => e instanceof NavigationEnd)
+        ).subscribe(() => {
+            this.loadBarbers();
+        });
         // Ensure we load barbers after the view is fully rendered
         afterNextRender(() => {
             if (this.barbers.length === 0 && !this.loading) {
@@ -32,6 +43,12 @@ export class HomeComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadBarbers();
+    }
+
+    ngOnDestroy(): void {
+        if (this.routerSubscription) {
+            this.routerSubscription.unsubscribe();
+        }
     }
 
     loadBarbers(): void {

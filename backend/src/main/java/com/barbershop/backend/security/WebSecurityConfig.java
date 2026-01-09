@@ -71,6 +71,7 @@ public class WebSecurityConfig {
                 .antMatchers("/").permitAll() // Allow Root/Home for Health Checks
                 .antMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/**").permitAll()
                 .antMatchers(org.springframework.http.HttpMethod.POST, "/api/appointments").permitAll() // Guest booking
+                .antMatchers(org.springframework.http.HttpMethod.POST, "/api/crm/leads").permitAll() // CRM Lead capture
                 .anyRequest().authenticated();
 
         http.headers().frameOptions().disable();

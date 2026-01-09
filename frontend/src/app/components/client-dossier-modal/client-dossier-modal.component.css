@@ -1,0 +1,189 @@
+.dossier-card {
+    background: var(--secondary-dark);
+    color: var(--text-white);
+}
+
+.dossier-header {
+    background: linear-gradient(to right, rgba(231, 76, 60, 0.1), transparent);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+.text-gray {
+    color: var(--text-gray);
+}
+
+.stat-box:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transition: background 0.3s;
+}
+
+/* Scrollbar styling for internal content if needed */
+.dossier-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dossier-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.dossier-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.text-light-gray {
+    color: #cccccc;
+}
+
+
+.gap-4 {
+    gap: 1.5rem;
+}
+
+.premium-input-inline {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 2px 0;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    outline: none;
+    border-radius: 0;
+}
+
+.premium-input-inline:focus {
+    border-bottom-color: var(--accent-red);
+}
+
+
+.premium-input-inline option {
+    background-color: var(--secondary-dark);
+    color: white;
+}
+
+.status-badge-outline {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.status-completed {
+    border-color: #2ecc71;
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.status-booked {
+    border-color: #3498db;
+    color: #3498db;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.status-cancelled {
+    border-color: #e74c3c;
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+/* --- Record Card Styles --- */
+.record-card {
+    width: 600px;
+    background: #1e1e1e;
+    /* Smooth dark grey */
+    border-radius: 6px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #333;
+    font-family: 'Inter', sans-serif;
+    /* Ensure modern font */
+}
+
+.record-header {
+    background: #252525;
+    border-bottom: 1px solid #333;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.record-content {
+    padding: 2rem;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+    /* Technical Grid Background */
+    background-color: #1e1e1e;
+}
+
+.record-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.record-value {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.record-value-lg {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.service-block {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px dashed #444;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.notes-field {
+    background: #111;
+    border-left: 3px solid var(--accent-red);
+    color: #ccc;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    padding: 1rem;
+    border-radius: 0 4px 4px 0;
+}
+
+.text-accent {
+    color: var(--accent-red, #e74c3c);
+}
+
+.barber-avatar-mini {
+    width: 32px;
+    height: 32px;
+    background: #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #fff;
+    margin-right: 0.75rem;
+}

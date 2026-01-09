@@ -46,6 +46,11 @@ public class Appointment {
     @JoinColumn(name = "appointment_type_id")
     private AppointmentType appointmentType;
 
+    // Audit fields
+    private LocalDateTime createdAt;
+    private String createdBy; // User email or "SYSTEM" or "GUEST"
+    private String creationSource; // e.g. "WEB", "MOBILE", "WALK_IN"
+
     public enum Status {
         BOOKED,
         COMPLETED,

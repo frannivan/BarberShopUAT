@@ -20,7 +20,7 @@ public class AppointmentType {
 
     private Double price;
 
-    private Integer durationMinutes; // Standard duration
+    private Integer durationMinutes;
 
-    private String color; // Hex code for UI display
+    private String color;
 }

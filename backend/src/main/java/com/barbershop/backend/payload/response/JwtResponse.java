@@ -1,10 +1,13 @@
 package com.barbershop.backend.payload.response;
 
 import lombok.Data;
-
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class JwtResponse {
     private String token;
     private String type = "Bearer";

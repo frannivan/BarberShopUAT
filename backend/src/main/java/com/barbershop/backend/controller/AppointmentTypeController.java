@@ -23,7 +23,7 @@ public class AppointmentTypeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> createType(@RequestBody AppointmentType type) {
         if (appointmentTypeRepository.findByName(type.getName()).isPresent()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Type name already exists."));
@@ -33,12 +33,28 @@ public class AppointmentTypeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteType(@PathVariable Long id) {
         if (!appointmentTypeRepository.existsById(id)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Type not found."));
         }
         appointmentTypeRepository.deleteById(id);
         return ResponseEntity.ok(new MessageResponse("Appointment Type deleted successfully!"));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> updateType(@PathVariable Long id, @RequestBody AppointmentType typeDetails) {
+        return appointmentTypeRepository.findById(id)
+                .map(type -> {
+                    type.setName(typeDetails.getName());
+                    type.setPrice(typeDetails.getPrice());
+                    type.setDurationMinutes(typeDetails.getDurationMinutes());
+                    type.setColor(typeDetails.getColor());
+                    type.setDescription(typeDetails.getDescription());
+                    appointmentTypeRepository.save(type);
+                    return ResponseEntity.ok(new MessageResponse("Appointment Type updated successfully!"));
+                })
+                .orElse(ResponseEntity.badRequest().body(new MessageResponse("Error: Type not found.")));
     }
 }

@@ -19,7 +19,7 @@ public class BarberController {
     BarberRepository barberRepository;
 
     @org.springframework.web.bind.annotation.PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public org.springframework.http.ResponseEntity<?> createBarber(
             @org.springframework.web.bind.annotation.RequestBody Barber barber) {
         barberRepository.save(barber);
@@ -33,13 +33,13 @@ public class BarberController {
     }
 
     @GetMapping("/admin/all")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<Barber> getAllBarbersAdmin() {
         return barberRepository.findAll();
     }
 
     @org.springframework.web.bind.annotation.PutMapping("/{id}/status")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public org.springframework.http.ResponseEntity<?> toggleBarberStatus(
             @org.springframework.web.bind.annotation.PathVariable Long id) {
         System.out.println("DEBUG: Toggling status for Barber ID: " + id);

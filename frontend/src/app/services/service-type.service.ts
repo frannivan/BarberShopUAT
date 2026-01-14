@@ -24,4 +24,8 @@ export class ServiceTypeService {
     deleteType(id: number): Observable<any> {
         return this.http.delete(`${API_URL}/${id}`);
     }
+
+    updateType(id: number, type: any): Observable<any> {
+        return this.http.put(`${API_URL}/${id}`, type);
+    }
 }

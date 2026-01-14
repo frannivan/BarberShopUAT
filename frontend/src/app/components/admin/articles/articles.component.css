@@ -1,0 +1,108 @@
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.item-card {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.service-icon {
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+}
+
+.product-icon {
+    background: rgba(var(--accent-rgb), 0.1);
+    color: var(--accent-color);
+}
+
+.promo-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.card-content h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0.5rem 0;
+}
+
+.description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    min-height: 2.7rem;
+    /* 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.meta {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.discount-badge {
+    background: #ffc107;
+    color: #000;
+    font-weight: bold;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    display: inline-block;
+    margin: 0.5rem 0;
+}
+
+.card-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.item-card:hover .card-actions {
+    opacity: 1;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}

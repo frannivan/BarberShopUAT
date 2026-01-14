@@ -9,22 +9,219 @@
         <p>You have no booked appointments.</p>
     </div>
 
-    <div class="appointments-list" *ngIf="!loading && appointments.length > 0">
-        <mat-card *ngFor="let appointment of appointments" class="appointment-card">
-            <mat-card-header>
-                <mat-card-title>Appointment with {{ appointment.barber?.name || 'Unknown Barber' }}</mat-card-title>
-                <mat-card-subtitle>{{ appointment.startTime | date:'medium' }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-                <p>Status: <span class="status-label status-booked">{{ appointment.status }}</span></p>
-                <p>
-                    <span class="font-weight-bold">Time:</span> {{ appointment.startTime | date:'shortTime' }}
-                    <span *ngIf="appointment.endTime"> - {{ appointment.endTime | date:'shortTime' }}</span>
-                </p>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-button color="warn" (click)="cancelAppointment(appointment.id)">Cancel Appointment</button>
-            </mat-card-actions>
-        </mat-card>
+    <div class="appointments-list">
+
+        <!-- SECTION: TODAY -->
+        <div *ngIf="todayAppointments.length > 0" class="section-container mb-4">
+            <h3 class="section-title text-white mb-3 pl-2" style="border-left: 4px solid #e74c3c; line-height: 1;">
+                Hoy
+            </h3>
+            <div class="timeline-dark">
+                <div class="timeline-item" *ngFor="let appointment of todayAppointments">
+                    <!-- Custom Marker for Today -->
+                    <div class="timeline-marker"
+                        style="background: #e74c3c; box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);"></div>
+                    <div class="timeline-content">
+                        <!-- Header -->
+                        <div class="appointment-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="date-text font-weight-bold" style="color: #e74c3c;">HOY - {{
+                                appointment.startTime | date:'shortTime' }}</span>
+
+                            <span *ngIf="isInProgress(appointment)" class="status-blink-green">
+                                EN PROCESO
+                            </span>
+                            <span *ngIf="!isInProgress(appointment)" class="status-badge-small"
+                                [ngClass]="appointment.status.toLowerCase()">
+                                {{ appointment.status }}
+                            </span>
+                        </div>
+
+                        <div class="appointment-body-grid mt-3">
+                            <!-- Left Col: Service & Barber -->
+                            <div class="col-left">
+                                <h4 class="service-name text-dark mb-1" style="font-weight: 700;">
+                                    {{ appointment.appointmentType?.name || 'Servicio' }}
+                                    <span class="text-muted small d-block mt-1"
+                                        style="font-weight: 400; font-size: 0.9em;">
+                                        PARA {{ appointment.client?.name || appointment.clientName ||
+                                        appointment.guestName || 'Cliente' }}
+                                    </span>
+                                </h4>
+                                <div class="barber-info d-flex align-items-center gap-2 mt-3">
+                                    <div class="barber-avatar-small"
+                                        [style.background]="appointment.barber?.color || '#333'"
+                                        style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; position: relative;">
+                                        <img *ngIf="appointment.barber?.photoUrl" [src]="appointment.barber.photoUrl"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                        <span *ngIf="!appointment.barber?.photoUrl">{{
+                                            appointment.barber?.name?.charAt(0) }}</span>
+                                    </div>
+                                    <span class="text-white-50 small">Barbero: {{ appointment.barber?.name }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Right Col: Notes & Actions -->
+                            <div class="col-right">
+                                <!-- Comentarios Prominentes -->
+                                <div class="notes-block p-2 mb-3"
+                                    style="background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid #e74c3c;">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-comment-alt mr-2 text-muted" style="font-size: 0.8em;"></i>
+                                        <strong
+                                            style="font-size: 0.9em; color: rgba(255,255,255,0.8);">Comentarios:</strong>
+                                    </div>
+                                    <p class="mb-0 text-white-50 pl-1" style="font-size: 0.9em; line-height: 1.4;">{{
+                                        appointment.notes || 'Sin comentarios adicionales.' }}</p>
+                                </div>
+                                <div class="appointment-actions">
+                                    <button mat-button color="warn" class="small-btn"
+                                        (click)="cancelAppointment(appointment.id)"
+                                        *ngIf="appointment.status !== 'CANCELLED'">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: UPCOMING -->
+        <div *ngIf="upcomingAppointments.length > 0" class="section-container mb-4">
+            <h3 class="section-title text-white mb-3 pl-2" style="border-left: 4px solid #3498db; line-height: 1;">
+                Próximos Días
+            </h3>
+            <div class="timeline-dark">
+                <div class="timeline-item" *ngFor="let appointment of upcomingAppointments">
+                    <div class="timeline-marker" style="background: #3498db;"></div>
+                    <div class="timeline-content">
+                        <!-- Header -->
+                        <div class="appointment-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="date-text text-info font-weight-bold">{{ appointment.startTime | date:'EEEE d
+                                MMMM' | uppercase }} - {{ appointment.startTime | date:'shortTime' }}</span>
+
+                            <span *ngIf="isInProgress(appointment)" class="status-blink-green">
+                                EN PROCESO
+                            </span>
+                            <span *ngIf="!isInProgress(appointment)" class="status-badge-small"
+                                [ngClass]="appointment.status.toLowerCase()">
+                                {{ appointment.status }}
+                            </span>
+                        </div>
+                        <div class="appointment-body-grid mt-3">
+                            <!-- Left Col -->
+                            <div class="col-left">
+                                <h4 class="service-name text-dark mb-1">
+                                    {{ appointment.appointmentType?.name || 'Servicio' }}
+                                    <span class="text-muted small d-block mt-1"
+                                        style="font-weight: 400; font-size: 0.9em;">
+                                        PARA {{ appointment.client?.name || appointment.clientName ||
+                                        appointment.guestName || 'Cliente' }}
+                                    </span>
+
+                                </h4>
+                                <div class="barber-info d-flex align-items-center gap-2 mt-3">
+                                    <div class="barber-avatar-small"
+                                        [style.background]="appointment.barber?.color || '#333'"
+                                        style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; position: relative;">
+                                        <img *ngIf="appointment.barber?.photoUrl" [src]="appointment.barber.photoUrl"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                        <span *ngIf="!appointment.barber?.photoUrl">{{
+                                            appointment.barber?.name?.charAt(0) }}</span>
+                                    </div>
+                                    <span class="text-white-50 small">Barbero: {{ appointment.barber?.name }}</span>
+                                </div>
+                            </div>
+                            <!-- Right Col -->
+                            <div class="col-right">
+                                <div class="notes-block p-2 mb-3"
+                                    style="background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid #3498db;">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-comment-alt mr-2 text-muted" style="font-size: 0.8em;"></i>
+                                        <strong
+                                            style="font-size: 0.9em; color: rgba(255,255,255,0.8);">Comentarios:</strong>
+                                    </div>
+                                    <p class="mb-0 text-white-50 pl-1" style="font-size: 0.9em; line-height: 1.4;">{{
+                                        appointment.notes || 'Sin comentarios adicionales.' }}</p>
+                                </div>
+                                <div class="appointment-actions">
+                                    <button mat-button color="warn" class="small-btn"
+                                        (click)="cancelAppointment(appointment.id)"
+                                        *ngIf="appointment.status !== 'CANCELLED'">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: HISTORY (PAST) -->
+        <div *ngIf="pastAppointments.length > 0" class="section-container">
+            <h3 class="section-title text-muted mb-3 pl-2" style="border-left: 4px solid #7f8c8d; line-height: 1;">
+                Historial
+            </h3>
+            <div class="timeline-dark">
+                <div class="timeline-item" *ngFor="let appointment of pastAppointments">
+                    <div class="timeline-marker" style="background: #7f8c8d;"></div>
+                    <div class="timeline-content">
+                        <div class="appointment-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="date-text text-dark font-weight-bold">{{ appointment.startTime |
+                                date:'mediumDate' }} - {{ appointment.startTime | date:'shortTime' }}</span>
+
+                            <span *ngIf="isInProgress(appointment)" class="status-blink-green">
+                                EN PROCESO
+                            </span>
+                            <span *ngIf="!isInProgress(appointment)" class="status-badge-small"
+                                [ngClass]="appointment.status.toLowerCase()">
+                                {{ appointment.status }}
+                            </span>
+                        </div>
+                        <div class="appointment-body-grid mt-3">
+                            <div class="col-left">
+                                <h4 class="service-name text-dark mb-1">
+                                    {{ appointment.appointmentType?.name || 'Servicio' }}
+                                    <span class="text-muted small d-block mt-1"
+                                        style="font-weight: 400; font-size: 0.9em;">
+                                        PARA {{ appointment.client?.name || appointment.clientName ||
+                                        appointment.guestName || 'Cliente' }}
+                                    </span>
+                                </h4>
+                                <div class="barber-info d-flex align-items-center gap-2 mt-3">
+                                    <div class="barber-avatar-small"
+                                        [style.background]="appointment.barber?.color || '#7f8c8d'"
+                                        style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; position: relative;">
+                                        <img *ngIf="appointment.barber?.photoUrl" [src]="appointment.barber.photoUrl"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                        <span *ngIf="!appointment.barber?.photoUrl">{{
+                                            appointment.barber?.name?.charAt(0) }}</span>
+                                    </div>
+                                    <span class="text-white-50 small">Barbero: {{ appointment.barber?.name }}</span>
+                                </div>
+                            </div>
+                            <div class="col-right">
+                                <div class="notes-block p-2 mb-3"
+                                    style="background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid #7f8c8d;">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-comment-alt mr-2 text-muted" style="font-size: 0.8em;"></i>
+                                        <strong
+                                            style="font-size: 0.9em; color: rgba(255,255,255,0.8);">Comentarios:</strong>
+                                    </div>
+                                    <p class="mb-0 text-white-50 pl-1" style="font-size: 0.9em; line-height: 1.4;">{{
+                                        appointment.notes || 'Sin comentarios adicionales.' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

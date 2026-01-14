@@ -209,7 +209,7 @@
             </div>
         </mat-tab>
         <!-- Client History (CRM) Tab -->
-        <mat-tab label="Historial de Clientes">
+        <mat-tab label="Clientes">
             <div class="tab-content" style="position: relative;">
                 <div class="row justify-content-center">
                     <div class="col-md-11">
@@ -297,198 +297,310 @@
         </mat-tab>
     </mat-tab-group>
 
-    <!-- Appointment Edit Modal Overlay -->
-    <div class="user-modal-overlay" *ngIf="showAppointmentModal"
-        style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index:999; display:flex; justify-content:center; align-items:center;"
-        (dblclick)="closeAppointmentModal()">
+    <!-- Appointment Edit Modal Overlay (Unified Lux) -->
+    <div class="modal-overlay-lux" *ngIf="showAppointmentModal" (click)="closeAppointmentModal()">
 
-        <mat-card class="user-modal-card" (click)="$event.stopPropagation()"
-            style="width: 600px; max-height: 90vh; overflow-y: auto; background: var(--secondary-dark); border: 1px solid var(--border-subtle); position: relative;">
+        <mat-card class="modal-card-lux medium" (click)="$event.stopPropagation()">
 
             <button class="close-btn-sexy" (click)="closeAppointmentModal()">
                 <mat-icon>close</mat-icon>
             </button>
 
-            <mat-card-header>
-                <mat-card-title>Editar Cita</mat-card-title>
-                <mat-card-subtitle class="text-white-50">Gestionar detalles de la reserva</mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content class="pt-3">
-                <div class="row">
-                    <div class="col-md-6 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Barbero</mat-label>
-                            <mat-select [(ngModel)]="editBarberId">
-                                <mat-option *ngFor="let b of barbers" [value]="b.id">{{ b.name }}</mat-option>
-                            </mat-select>
-                        </mat-form-field>
+            <div class="modal-header-lux mb-4 border-bottom border-secondary pb-3 mt-2"
+                style="margin-bottom: 3rem !important;">
+                <div class="d-flex align-items-center justify-content-center w-100">
+                    <div class="user-avatar-lux mr-3" style="background: var(--gradient-gold); color: black;">
+                        <mat-icon>edit_calendar</mat-icon>
                     </div>
-                    <div class="col-md-6 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Servicio (Tipo)</mat-label>
-                            <mat-select [(ngModel)]="editTypeId">
-                                <mat-option *ngFor="let t of serviceTypes" [value]="t.id">{{ t.name }}</mat-option>
-                            </mat-select>
-                        </mat-form-field>
+                    <div class="text-center">
+                        <h3 class="mb-0">Editar Cita</h3>
+                        <p class="text-gray mb-0 small">Gestionar detalles de la reserva</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Fecha</mat-label>
-                            <input matInput [matDatepicker]="editDistPicker" [(ngModel)]="editDate">
-                            <mat-datepicker-toggle matSuffix [for]="editDistPicker"></mat-datepicker-toggle>
-                            <mat-datepicker #editDistPicker></mat-datepicker>
-                        </mat-form-field>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Hora Inicio</mat-label>
-                            <input matInput type="time" [(ngModel)]="editTime">
-                        </mat-form-field>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Hora Fin</mat-label>
-                            <input matInput type="time" [(ngModel)]="editEndTime">
-                        </mat-form-field>
-                    </div>
-                </div>
+            <mat-card-content>
+                <div class="booking-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- TOP GRID: 2 COLUMNS -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+                        <!-- LEFT CARD: PROFESSIONAL & SERVICE -->
+                        <div class="booking-card"
+                            style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">work</mat-icon>
+                                Profesional y Servicio
+                            </h6>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
+                                <mat-label>Barbero</mat-label>
+                                <mat-select [(ngModel)]="editBarberId">
+                                    <mat-option *ngFor="let b of activeBarbers" [value]="b.id">{{ b.name }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
 
-                <div class="row" *ngIf="editGuestName || editGuestEmail">
-                    <div class="col-12 mb-2">
-                        <h5 class="text-white mt-2">Datos del Cliente (Invitado)</h5>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Nombre</mat-label>
-                            <input matInput [(ngModel)]="editGuestName">
-                        </mat-form-field>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Email</mat-label>
-                            <input matInput [(ngModel)]="editGuestEmail">
-                        </mat-form-field>
-                    </div>
-                </div>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                <mat-label>Servicio</mat-label>
+                                <mat-select [(ngModel)]="editTypeId">
+                                    <mat-option *ngFor="let t of serviceTypes" [value]="t.id">{{ t.name }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
 
-                <div class="row">
-                    <div class="col-md-12 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Estatus</mat-label>
+                        <!-- RIGHT CARD: TIMING -->
+                        <div class="booking-card"
+                            style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-4 d-flex align-items-center"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">event</mat-icon>
+                                Fecha y Hora
+                            </h6>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
+                                <mat-label>Fecha</mat-label>
+                                <input matInput [matDatepicker]="editDistPicker" [(ngModel)]="editDate">
+                                <mat-datepicker-toggle matSuffix [for]="editDistPicker"
+                                    class="text-accent"></mat-datepicker-toggle>
+                                <mat-datepicker #editDistPicker></mat-datepicker>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
+                                <mat-label>Inicio</mat-label>
+                                <input matInput type="time" [(ngModel)]="editTime">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                <mat-label>Fin</mat-label>
+                                <input matInput type="time" [(ngModel)]="editEndTime">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- GUEST INFO (Conditional) -->
+                    <div class="booking-card" *ngIf="editGuestName || editGuestEmail"
+                        style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">person_outline</mat-icon>
+                            Datos del Invitado
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                    <mat-label>Nombre</mat-label>
+                                    <input matInput [(ngModel)]="editGuestName">
+                                    <mat-icon matSuffix class="text-gray">person</mat-icon>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                    <mat-label>Email</mat-label>
+                                    <input matInput [(ngModel)]="editGuestEmail">
+                                    <mat-icon matSuffix class="text-gray">email</mat-icon>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTTOM CARD: STATUS & NOTES -->
+                    <div class="booking-card"
+                        style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <div class="d-flex justify-content-between align-items-center mb-2"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-0 d-flex align-items-center">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">content_paste</mat-icon>
+                                Estatus y Notas
+                            </h6>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact mt-2 mb-2">
+                            <mat-label>Estatus de la Cita</mat-label>
                             <mat-select [(ngModel)]="editStatus">
-                                <mat-option value="CONFIRMED">Confirmada</mat-option>
-                                <mat-option value="PENDING">Pendiente</mat-option>
-                                <mat-option value="COMPLETED">Completada</mat-option>
-                                <mat-option value="CANCELLED">Cancelada</mat-option>
-                                <mat-option value="NOSHOW">No Asistió</mat-option>
+                                <mat-option value="CONFIRMED" class="text-success">Confirmada</mat-option>
+                                <mat-option value="PENDING" class="text-warning">Pendiente</mat-option>
+                                <mat-option value="COMPLETED" class="text-info">Completada</mat-option>
+                                <mat-option value="CANCELLED" class="text-danger">Cancelada</mat-option>
+                                <mat-option value="NOSHOW" class="text-muted">No Asistió</mat-option>
                             </mat-select>
                         </mat-form-field>
-                    </div>
-                    <div class="col-md-12 mb-2">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Notas</mat-label>
-                            <textarea matInput [(ngModel)]="editNotes" rows="2"></textarea>
+
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                            <mat-label>Notas Internas</mat-label>
+                            <textarea matInput [(ngModel)]="editNotes" rows="3"
+                                placeholder="Detalles adicionales..."></textarea>
                         </mat-form-field>
                     </div>
-                </div>
 
+                </div>
             </mat-card-content>
 
             <mat-card-actions align="end">
-                <button mat-button (click)="closeAppointmentModal()">Cancelar</button>
-                <button mat-raised-button color="primary" (click)="saveAppointmentChanges()">Guardar Cambios</button>
+                <button mat-raised-button color="primary" class="brand-accent-pill px-4"
+                    (click)="saveAppointmentChanges()">
+                    Guardar Cambios
+                </button>
             </mat-card-actions>
+
         </mat-card>
     </div>
-
     <!-- User Modal Overlay -->
     <!-- Moved outside the tab group to ensure it works from any tab -->
-    <div class="user-modal-overlay" *ngIf="showUserModal"
-        style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index:999; display:flex; justify-content:center; align-items:center;"
-        (dblclick)="closeUserModal()"> <!-- Close on backdrop double click -->
-        <!-- Modal Card -->
-        <mat-card class="user-modal-card" (click)="$event.stopPropagation()"
-            style="width: 500px; max-height: 90vh; overflow-y: auto; background: var(--secondary-dark); border: 1px solid var(--border-subtle); position: relative;">
+    <!-- User Modal Overlay (Unified Lux) -->
+    <div class="modal-overlay-lux" *ngIf="showUserModal" (click)="closeUserModal()">
+
+        <mat-card class="modal-card-lux medium" (click)="$event.stopPropagation()">
 
             <button class="close-btn-sexy" (click)="closeUserModal()">
                 <mat-icon>close</mat-icon>
             </button>
-            <mat-card-header>
-                <mat-card-title>{{ isEditingUser ? 'Editar ' + (modalContext === 'client' ? 'Cliente' : 'Personal') :
-                    'Agregar ' + (modalContext === 'client' ? 'Cliente' : 'Nuevo Personal') }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="pt-3">
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Nombre</mat-label>
-                    <input matInput [(ngModel)]="newUser.name" required>
-                </mat-form-field>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Email</mat-label>
-                    <input matInput [(ngModel)]="newUser.email" required email>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width" *ngIf="!isEditingUser">
-                    <mat-label>Contraseña</mat-label>
-                    <input matInput [(ngModel)]="newUser.password" type="password" required>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="full-width" *ngIf="isEditingUser">
-                    <mat-label>Nueva Contraseña (Opcional)</mat-label>
-                    <input matInput [(ngModel)]="newUser.password" type="password"
-                        placeholder="Dejar en blanco para mantener actual">
-                </mat-form-field>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <mat-form-field appearance="outline" class="full-width">
-                            <mat-label>Teléfono</mat-label>
-                            <input matInput [(ngModel)]="newUser.phone">
-                        </mat-form-field>
+            <div class="modal-header-lux pb-2 mt-2 border-bottom border-secondary"
+                style="margin-bottom: 3rem !important;">
+                <div class="d-flex align-items-center justify-content-center w-100">
+                    <div class="user-avatar-lux mr-3" style="background: var(--gradient-red); color: white;">
+                        <i class="fas" [ngClass]="isEditingUser ? 'fa-user-edit' : 'fa-user-plus'"></i>
                     </div>
-                    <div class="col-md-6">
-                        <mat-form-field appearance="outline" class="full-width">
-                            <mat-label>Género</mat-label>
-                            <mat-select [(ngModel)]="newUser.gender">
-                                <mat-option value="Male">Masculino</mat-option>
-                                <mat-option value="Female">Femenino</mat-option>
-                                <mat-option value="Other">Otro</mat-option>
-                            </mat-select>
-                        </mat-form-field>
+                    <div class="text-center">
+                        <h3 class="mb-0">{{ isEditingUser ? 'Editar Perfil' : (modalContext === 'client' ? 'Nuevo
+                            Cliente' : 'Nuevo Empleado') }}</h3>
+                        <p class="text-gray mb-0 small">{{ modalContext === 'client' ? 'Gestión de Clientes' : 'Gestión
+                            de Personal' }}</p>
                     </div>
                 </div>
+            </div>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Rol</mat-label>
-                    <mat-select [(ngModel)]="newUser.role" required
-                        [disabled]="!isEditingUser && availableRoles.length === 1">
-                        <mat-option *ngFor="let r of availableRoles" [value]="r">{{ r }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
+            <mat-card-content>
+                <div class="booking-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
 
-                <!-- Barber Specific Fields -->
-                <div *ngIf="newUser.role === 'BARBER' || newUser.role === 'ADMIN_BARBER'" class="barber-fields p-3 mb-3"
-                    style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid var(--border-subtle);">
-                    <h4 class="mb-3" style="color: var(--text-white);">Perfil de Barbero</h4>
-                    <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>URL de Foto</mat-label>
-                        <input matInput [(ngModel)]="newUser.photoUrl">
-                    </mat-form-field>
-                    <div class="d-flex align-items-center gap-2">
-                        <label style="color: var(--text-light);">Color de Calendario:</label>
-                        <input type="color" [(ngModel)]="newUser.color"
-                            style="height: 40px; width: 60px; border: none; cursor: pointer; background: transparent;">
+                    <!-- TOP SECTION: 2-COLUMN GRID -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+
+                        <!-- LEFT CARD: BASIC INFO -->
+                        <div class="booking-card"
+                            style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">badge</mat-icon>
+                                Información Básica
+                            </h6>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-2">
+                                <mat-label>Nombre Completo</mat-label>
+                                <input matInput [(ngModel)]="newUser.name" required>
+                                <mat-icon matSuffix class="text-gray">badge</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-2">
+                                <mat-label>Email</mat-label>
+                                <input matInput [(ngModel)]="newUser.email" required email>
+                                <mat-icon matSuffix class="text-gray">email</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                <mat-label>Teléfono</mat-label>
+                                <input matInput [(ngModel)]="newUser.phone">
+                                <mat-icon matSuffix class="text-gray">phone</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- RIGHT CARD: SECURITY & ROLE -->
+                        <div class="booking-card"
+                            style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-4 d-flex align-items-center"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">security</mat-icon>
+                                Seguridad y Rol
+                            </h6>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
+                                <mat-label>Contraseña</mat-label>
+                                <input matInput [(ngModel)]="newUser.password" type="password"
+                                    [required]="!isEditingUser">
+                                <mat-icon matSuffix class="text-gray">lock</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
+                                <mat-label>Género</mat-label>
+                                <mat-select [(ngModel)]="newUser.gender">
+                                    <mat-option value="Male">Masculino</mat-option>
+                                    <mat-option value="Female">Femenino</mat-option>
+                                    <mat-option value="Other">Otro</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                <mat-label>Rol</mat-label>
+                                <mat-select [(ngModel)]="newUser.role" required
+                                    [disabled]="!isEditingUser && availableRoles.length === 1">
+                                    <mat-option *ngFor="let r of availableRoles" [value]="r">{{ r }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- BARBER SPECIFIC CONFIG (Conditional) -->
+                    <div *ngIf="newUser.role === 'BARBER' || newUser.role === 'ADMIN_BARBER'"
+                        class="booking-card animate-fade-in"
+                        style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">content_cut</mat-icon>
+                            Configuración de Barbero
+                        </h6>
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                            <!-- Photo Upload Section -->
+                            <div class="w-100">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact"
+                                    style="display:none">
+                                    <mat-label>URL de Foto</mat-label>
+                                    <input matInput [(ngModel)]="newUser.photoUrl">
+                                </mat-form-field>
+
+                                <div class="d-flex align-items-center justify-content-between p-3"
+                                    style="background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2);">
+                                    <span class="text-gray text-sm">Foto de Perfil</span>
+                                    <div class="d-flex align-items-center">
+                                        <button mat-stroked-button type="button" (click)="fileInput.click()"
+                                            class="mr-3 text-white border-white small-btn">
+                                            <mat-icon>cloud_upload</mat-icon> Subir
+                                        </button>
+                                        <input #fileInput type="file" (change)="onFileSelected($event)"
+                                            accept=".png, .jpg, .jpeg" style="display:none">
+
+                                        <img *ngIf="newUser.photoUrl" [src]="newUser.photoUrl"
+                                            class="rounded-circle border border-white"
+                                            style="width: 48px; height: 48px; object-fit: cover;">
+                                        <div *ngIf="!newUser.photoUrl"
+                                            class="rounded-circle border border-secondary d-flex align-items-center justify-content-center text-gray"
+                                            style="width: 48px; height: 48px; background: rgba(0,0,0,0.3);">
+                                            <mat-icon>person</mat-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Color Picker Section -->
+                            <div class="w-100">
+                                <div class="d-flex align-items-center justify-content-between p-3"
+                                    style="background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <label class="text-gray text-sm mb-0">Color Identificador</label>
+                                    <div class="d-flex align-items-center">
+                                        <span class="mr-3 text-xs text-muted">{{ newUser.color }}</span>
+                                        <input type="color" [(ngModel)]="newUser.color" class="color-picker-lux"
+                                            style="width: 60px; height: 40px; border: none; padding: 0; background: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
             </mat-card-content>
+
             <mat-card-actions align="end">
-                <button mat-button (click)="closeUserModal()">Cancelar</button>
-                <button mat-raised-button color="primary" (click)="saveUserForm()">Guardar</button>
+                <button mat-raised-button color="primary" class="brand-accent-pill px-4" (click)="saveUserForm()">
+                    {{ isEditingUser ? 'Guardar Cambios' : 'Crear Usuario' }}
+                </button>
             </mat-card-actions>
         </mat-card>
     </div>
-</div>

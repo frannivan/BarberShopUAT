@@ -1,0 +1,16 @@
+{
+    "paymentMethod": "CASH",
+    "status": "COMPLETED",
+    "totalAmount": 15,
+    "items": [
+        {
+            "itemName": "Corte de Prueba Real",
+            "price": 15,
+            "quantity": 1,
+            "subtotal": 15,
+            "service": {
+                "id": 1
+            }
+        }
+    ]
+}

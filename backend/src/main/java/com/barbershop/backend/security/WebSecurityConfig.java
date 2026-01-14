@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity(prePostEnabled = true)
 @org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 public class WebSecurityConfig {
     @Autowired
@@ -86,7 +86,7 @@ public class WebSecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.setAllowedOriginPatterns(java.util.Arrays.asList("http://localhost:4200",
-                "https://barbershop-ashen-gamma.vercel.app", "https://*.vercel.app"));
+                "https://barbershop-ashen-gamma.vercel.app", "https://*.vercel.app", "https://*.trycloudflare.com"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
         configuration.setAllowCredentials(true);

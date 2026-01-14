@@ -187,8 +187,17 @@ public class AppointmentController {
         return appointmentRepository.findAll();
     }
 
+    @GetMapping("/today")
+    @PreAuthorize("isAuthenticated()")
+    public List<Appointment> getTodayAppointments() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+        return appointmentRepository.findByStartTimeBetween(startOfDay, endOfDay);
+    }
+
     @GetMapping("/my-barber-appointments")
-    @PreAuthorize("hasRole('BARBER')")
+    @PreAuthorize("hasAuthority('ROLE_BARBER')")
     public List<Appointment> getMyBarberAppointments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -210,7 +219,7 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_USER')")
     public ResponseEntity<?> deleteAppointment(@PathVariable Long id) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Appointment not found."));
@@ -232,7 +241,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequest request) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Appointment not found."));
@@ -268,6 +277,15 @@ public class AppointmentController {
                     .findById(request.getAppointmentTypeId())
                     .orElseThrow(() -> new RuntimeException("Error: Appointment type not found."));
             appointment.setAppointmentType(type);
+        }
+
+        // Update status if provided
+        if (request.getStatus() != null) {
+            try {
+                appointment.setStatus(Appointment.Status.valueOf(request.getStatus()));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status or handle error
+            }
         }
 
         appointmentRepository.save(appointment);

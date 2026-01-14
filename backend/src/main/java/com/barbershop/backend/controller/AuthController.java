@@ -82,6 +82,10 @@ public class AuthController {
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
 
+        if (signUpRequest.getObservations() != null) {
+            user.setObservations(signUpRequest.getObservations());
+        }
+
         String strRole = signUpRequest.getRole();
         if (strRole == null || strRole.isEmpty()) {
             user.setRole(User.Role.USER);
@@ -110,13 +114,13 @@ public class AuthController {
     }
 
     @GetMapping("/users")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @DeleteMapping("/users/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));

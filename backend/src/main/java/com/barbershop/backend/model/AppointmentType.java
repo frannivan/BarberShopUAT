@@ -23,4 +23,6 @@ public class AppointmentType {
     private Integer durationMinutes;
 
     private String color;
+
+    private String description;
 }

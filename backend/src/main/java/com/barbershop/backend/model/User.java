@@ -31,9 +31,14 @@ public class User {
 
     private String gender;
 
+    private Integer age;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(length = 5000)
+    private String observations;
 
     public User(String email, String password, String name, Role role) {
         this.email = email;

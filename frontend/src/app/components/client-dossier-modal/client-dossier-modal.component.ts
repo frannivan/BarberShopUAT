@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, Inject, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +22,6 @@ import { AdminService } from '../../services/admin.service';
         MatIconModule,
         MatCardModule,
         MatTooltipModule,
-        DatePipe,
         FormsModule,
         MatFormFieldModule,
         MatInputModule,
@@ -48,7 +47,9 @@ export class ClientDossierModalComponent implements OnInit {
         public dialogRef: MatDialogRef<ClientDossierModalComponent>,
         @Inject(MAT_DIALOG_DATA) public data: any,
         private appointmentService: AppointmentService,
-        private adminService: AdminService
+        private adminService: AdminService,
+        private cdRef: ChangeDetectorRef,
+        private ngZone: NgZone
     ) {
         this.client = { ...data.client }; // Clone to avoid mutation before save
         this.originalClient = { ...data.client };
@@ -66,7 +67,21 @@ export class ClientDossierModalComponent implements OnInit {
     }
 
     fetchHistory() {
-        // Implementation remains same
+        this.isLoading = true;
+        this.appointmentService.getAppointments().subscribe({
+            next: (data) => {
+                // Admin gets all appointments, so we filter for this specific client
+                if (Array.isArray(data)) {
+                    this.history = data.filter((appt: any) => appt.user && appt.user.id == this.client.id);
+                }
+                this.processHistory();
+                this.isLoading = false;
+            },
+            error: (err) => {
+                console.error('Error fetching history:', err);
+                this.isLoading = false;
+            }
+        });
     }
 
     processHistory() {
@@ -129,16 +144,63 @@ export class ClientDossierModalComponent implements OnInit {
 
     saveProfile() {
         this.isLoading = true;
-        this.adminService.updateUser(this.client.id, this.client).subscribe({
+
+        // Ensure role is a string and valid; fallback to original or USER
+        let roleVal = this.client.role || 'USER';
+        try {
+            roleVal = String(roleVal).toUpperCase();
+        } catch (e) { roleVal = 'USER'; }
+
+        // Create a clean payload
+        const payload = {
+            name: this.client.name,
+            email: this.client.email,
+            phone: this.client.phone,
+            gender: this.client.gender,
+            role: roleVal,
+            age: this.client.age,
+            observations: this.client.observations
+        };
+
+        console.log('Sending Payload:', payload);
+
+        this.adminService.updateUser(this.client.id, payload).subscribe({
             next: (res) => {
-                this.isLoading = false;
-                this.isEditing = false;
-                this.originalClient = { ...this.client };
-                // Optionally notify parent
+                console.log('Success:', res);
+
+                // Run inside Angular Zone
+                this.ngZone.run(() => {
+                    // 1. Alert (User wants confirmation)
+                    alert('Guardado correctamente!');
+
+                    // 2. Update Local State (So the view reflects changes)
+                    this.client = { ...this.client, ...payload }; // Merge payload back to client
+                    this.originalClient = { ...this.client };     // Sync original
+                    this.isEditing = false;                       // Switch back to view mode
+                    this.isLoading = false;
+
+                    // 3. Update Parent Reference (for when modal closes later)
+                    if (this.data && this.data.client) {
+                        try {
+                            this.data.client.name = this.client.name;
+                            this.data.client.phone = this.client.phone;
+                            this.data.client.gender = this.client.gender;
+                            this.data.client.age = this.client.age;
+                            this.data.client.email = this.client.email;
+                        } catch (e) { }
+                    }
+
+                    // 4. Force UI Refresh
+                    this.cdRef.detectChanges();
+                });
             },
             error: (err) => {
-                console.error(err);
-                this.isLoading = false;
+                console.error('Save Error:', err);
+                this.ngZone.run(() => {
+                    this.isLoading = false;
+                    this.cdRef.detectChanges();
+                    alert('ERROR DE GUARDADO:\n' + (err.error?.message || err.message || 'Error desconocido'));
+                });
             }
         });
     }

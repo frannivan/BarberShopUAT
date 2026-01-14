@@ -1,499 +1,555 @@
-<div class="booking-container animate-fade-in">
-    <!-- HEADER SECTION: Redesigned for Symmetrical Centering & Card Aesthetic -->
-    <div class="header-section mb-5 mt-4 d-flex justify-content-center text-center">
-        <div class="header-card-premium animate-fade-in mx-auto">
-            <h1 class="page-title-lux mb-2">Visor de Citas</h1>
-            <p class="text-subtitle mb-0">Gestión maestra de barbería y calendario</p>
-            <div class="mt-3" *ngIf="!isLoggedIn">
-                <span class="badge-premium-guest d-inline-block">
-                    <i class="fas fa-user-secret mr-1"></i> Modo Invitado
-                </span>
+<!-- HEADER SECTION: Redesigned with Master LUX CSS -->
+<div class="mb-4">
+    <!-- Title Section -->
+    <div class="d-flex justify-content-between align-items-end mb-3 px-2">
+        <div>
+            <!-- MASTER CLASS: .section-title-lux -->
+            <h2 class="section-title-lux mb-0">Visor de Citas</h2>
+            <p class="text-subtitle mb-0" *ngIf="!isLoggedIn"><i class="fas fa-user-secret"></i> Invitado</p>
+        </div>
+    </div>
+
+    <!-- UNIFIED TOOLBAR FRAME -->
+    <div class="booking-toolbar-frame p-3">
+        <div class="toolbar-content">
+            <!-- 1. Filters Group -->
+            <div class="filter-group">
+                <!-- Barbers Filter -->
+                <div class="search-box-lux flex-grow-1">
+                    <mat-form-field appearance="outline" class="premium-search status-select">
+                        <mat-label>Filtrar por Barbero</mat-label>
+                        <mat-select [(ngModel)]="selectedBarberId" (selectionChange)="onBarberChange()">
+                            <mat-option [value]="0">
+                                <span class="barber-option"><span class="color-indicator all-barbers"></span>
+                                    Todos</span>
+                            </mat-option>
+                            <mat-option *ngFor="let barber of barbers" [value]="barber.id">
+                                <span class="barber-option">
+                                    <span class="color-indicator"
+                                        [style.background-color]="getBarberColor(barber.id)"></span>
+                                    {{ barber.name }}
+                                </span>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- View Switcher -->
+                <div class="search-box-lux view-select">
+                    <mat-form-field appearance="outline" class="premium-search status-select">
+                        <mat-label>Vista</mat-label>
+                        <mat-select [(ngModel)]="selectedView" (selectionChange)="onViewChange()">
+                            <mat-option value="calendar"><mat-icon class="mr-2">calendar_month</mat-icon>
+                                Cal.</mat-option>
+                            <mat-option value="list"><mat-icon class="mr-2">list</mat-icon> List</mat-option>
+                            <mat-option value="both"><mat-icon class="mr-2">grid_view</mat-icon> Dual</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- 2. Action Button -->
+            <div class="action-group">
+                <!-- MASTER CLASS: .btn-lux-primary -->
+                <button class="btn-lux-primary w-100" (click)="openBookingModal()">
+                    <mat-icon class="mr-2">add_circle</mat-icon> Nueva Cita
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="booking-content-layout" [class.split-view]="selectedView === 'both'">
+    <!-- CALENDAR SECTION -->
+    <div class="calendar-panel animate-fade-in" *ngIf="selectedView === 'calendar' || selectedView === 'both'">
+        <div class="calendar-wrapper card-glass p-4 shadow-sm border-premium">
+            <div class="panel-header d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <mat-icon class="text-red">calendar_month</mat-icon>
+                    <h3 class="section-title mb-0">Calendario Maestro</h3>
+                </div>
+                <!-- LIVE CLOCK & DATE (Combined) -->
+                <div class="date-clock-badge d-flex align-items-center gap-3"
+                    style="background: rgba(255,255,255,0.05); padding: 8px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+
+                    <!-- Date Title -->
+                    <span class="view-title text-white font-weight-bold"
+                        style="font-size: 1.1rem; text-transform: capitalize;">
+                        {{ viewTitle }}
+                    </span>
+
+                    <!-- Separator -->
+                    <span class="divider" style="color: #666;">|</span>
+
+                    <!-- Clock -->
+                    <div class="d-flex align-items-center">
+                        <mat-icon class="text-red mr-2"
+                            style="font-size: 20px; width: 20px; height: 20px;">access_time</mat-icon>
+                        <span class="clock-digits text-white font-weight-bold"
+                            style="font-size: 1.2rem; letter-spacing: 1px;">{{ currentTime }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="calendar-body">
+                <full-calendar *ngIf="calendarOptions" [options]="calendarOptions"></full-calendar>
             </div>
         </div>
     </div>
 
-    <!-- UNIFIED HEADER (Standardized) -->
-    <div class="card-glass-premium mb-5 p-4 animate-slide-up">
-        <div class="p-0" style="/* border-bottom removed inside card, or keep consistency */">
-            <div class="row align-items-center">
-                <!-- Left: Title -->
-                <div class="col-md-3">
-                    <h2 class="section-title mb-0">Visor de Citas</h2>
+    <!-- LIST SECTION -->
+    <div class="list-panel animate-fade-in" *ngIf="selectedView === 'list' || selectedView === 'both'">
+        <div class="table-container card-glass p-4 shadow-sm border-premium">
+            <div class="panel-header d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <mat-icon class="text-red">list_alt</mat-icon>
+                    <h3 class="section-title mb-0">Listado de Citas</h3>
                 </div>
+                <div class="badge-premium-count" *ngIf="dataSource && dataSource.data.length > 0">
+                    {{ dataSource.data.length }} Citas
+                </div>
+            </div>
 
-                <!-- Center: Controls (Filter + View) -->
-                <div class="col-md-6 text-center">
-                    <div class="d-flex justify-content-center align-items-center gap-3">
-                        <!-- Filter (Pill Style) -->
-                        <div style="width: 100%; max-width: 300px;">
-                            <mat-form-field appearance="outline" class="premium-search status-select">
-                                <mat-label>Filtrar por Barbero</mat-label>
-                                <mat-select [(ngModel)]="selectedBarberId" (selectionChange)="onBarberChange()">
-                                    <mat-option [value]="0">
-                                        <span class="barber-option">
-                                            <span class="color-indicator all-barbers"></span> Todos (General)
-                                        </span>
-                                    </mat-option>
-                                    <mat-option *ngFor="let barber of barbers" [value]="barber.id">
-                                        <span class="barber-option">
-                                            <span class="color-indicator"
-                                                [style.background-color]="getBarberColor(barber.id)"></span>
-                                            {{ barber.name }}
-                                        </span>
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
+            <div class="premium-table-wrapper">
+                <!-- Standard mat-table component for stable MDC rendering -->
+                <mat-table [dataSource]="dataSource" matSort class="premium-table">
+                    <!-- Date Column -->
+                    <ng-container matColumnDef="date">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </mat-header-cell>
+                        <mat-cell *matCellDef="let row"> {{ row.displayDate | date:'dd/MM/yyyy' }} </mat-cell>
+                    </ng-container>
 
-                        <!-- View Logic -->
-                        <div style="width: 180px;">
-                            <mat-form-field appearance="outline" class="premium-search status-select">
-                                <mat-label>Vista</mat-label>
-                                <mat-select [(ngModel)]="selectedView">
-                                    <mat-option value="calendar"><mat-icon>calendar_month</mat-icon>
-                                        Calendario</mat-option>
-                                    <mat-option value="list"><mat-icon>list_alt</mat-icon> Listado</mat-option>
-                                    <mat-option value="both"><mat-icon>grid_view</mat-icon> Dual</mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
+                    <!-- Time Column -->
+                    <ng-container matColumnDef="time">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> Hora </mat-header-cell>
+                        <mat-cell *matCellDef="let row"> {{ row.displayTime }} </mat-cell>
+                    </ng-container>
 
+                    <!-- Barber Column -->
+                    <ng-container matColumnDef="barber">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> Barbero </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <div class="d-flex align-items-center">
+                                <span class="color-indicator-sm"
+                                    [style.background-color]="getBarberColor(row.barber?.id)"></span>
+                                {{ row.barber?.name }}
+                            </div>
+                        </mat-cell>
+                    </ng-container>
 
-                        <!-- Right: New Appointment Button -->
-                        <div class="col-md-3 text-end">
-                            <button class="btn-action-lux btn-new-compact" (click)="openBookingModal()">
-                                <mat-icon
-                                    style="font-size: 1.2rem; height: 1.2rem; width: 1.2rem; margin-right: 5px;">add</mat-icon>
-                                Nueva Cita
+                    <!-- Client Column -->
+                    <ng-container matColumnDef="client">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <span class="client-name">{{ row.clientName }}</span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Type Column -->
+                    <ng-container matColumnDef="type">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> Servicio </mat-header-cell>
+                        <mat-cell *matCellDef="let row"> {{ row.appointmentType?.name || 'Estándar' }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Notes Column -->
+                    <ng-container matColumnDef="notes">
+                        <mat-header-cell *matHeaderCellDef> Notas </mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="text-truncate" style="max-width: 150px;">
+                            <span [matTooltip]="row.notes">{{ row.notes }}</span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                        <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <button mat-icon-button color="primary" (click)="loadAppointmentForEdit(row.id)">
+                                <mat-icon>visibility</mat-icon>
                             </button>
-                        </div>
-                    </div>
+                            <button mat-icon-button color="warn" *ngIf="isAdmin"
+                                (click)="$event.stopPropagation(); selectedAppointment={id: row.id}; deleteAppointment()">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;" class="animate-row"></mat-row>
+                </mat-table>
+
+                <!-- Empty State -->
+                <div class="empty-state p-5 text-center" *ngIf="dataSource && dataSource.data.length === 0">
+                    <mat-icon class="large-icon mb-3"
+                        style="font-size: 4rem; width: 64px; height: 64px;">event_busy</mat-icon>
+                    <h4>No hay citas registradas</h4>
+                    <p class="text-muted">No se encontraron citas para los criterios seleccionados.</p>
                 </div>
             </div>
-        </div>
-
-        <div class="booking-content-layout" [class.split-view]="selectedView === 'both'">
-            <!-- CALENDAR SECTION -->
-            <div class="calendar-panel animate-fade-in" *ngIf="selectedView === 'calendar' || selectedView === 'both'">
-                <div class="calendar-wrapper card-glass p-4 shadow-sm border-premium">
-                    <div class="panel-header d-flex align-items-center mb-4">
-                        <mat-icon class="text-red">calendar_month</mat-icon>
-                        <h3 class="section-title mb-0">Calendario Maestro</h3>
-                    </div>
-                    <div class="calendar-body">
-                        <full-calendar *ngIf="calendarOptions" [options]="calendarOptions"></full-calendar>
-                    </div>
-                </div>
-            </div>
-
-            <!-- LIST SECTION -->
-            <div class="list-panel animate-fade-in" *ngIf="selectedView === 'list' || selectedView === 'both'">
-                <div class="table-container card-glass p-4 shadow-sm border-premium">
-                    <div class="panel-header d-flex justify-content-between align-items-center mb-4">
-                        <div class="d-flex align-items-center">
-                            <mat-icon class="text-red">list_alt</mat-icon>
-                            <h3 class="section-title mb-0">Listado de Citas</h3>
-                        </div>
-                        <div class="badge-premium-count" *ngIf="dataSource && dataSource.data.length > 0">
-                            {{ dataSource.data.length }} Citas
-                        </div>
-                    </div>
-
-                    <div class="premium-table-wrapper">
-                        <!-- Standard mat-table component for stable MDC rendering -->
-                        <mat-table [dataSource]="dataSource" matSort class="premium-table">
-                            <!-- Date Column -->
-                            <ng-container matColumnDef="date">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </mat-header-cell>
-                                <mat-cell *matCellDef="let row"> {{ row.displayDate | date:'dd/MM/yyyy' }} </mat-cell>
-                            </ng-container>
-
-                            <!-- Time Column -->
-                            <ng-container matColumnDef="time">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header> Hora </mat-header-cell>
-                                <mat-cell *matCellDef="let row"> {{ row.displayTime }} </mat-cell>
-                            </ng-container>
-
-                            <!-- Barber Column -->
-                            <ng-container matColumnDef="barber">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header> Barbero </mat-header-cell>
-                                <mat-cell *matCellDef="let row">
-                                    <div class="d-flex align-items-center">
-                                        <span class="color-indicator-sm"
-                                            [style.background-color]="getBarberColor(row.barber?.id)"></span>
-                                        {{ row.barber?.name }}
-                                    </div>
-                                </mat-cell>
-                            </ng-container>
-
-                            <!-- Client Column -->
-                            <ng-container matColumnDef="client">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </mat-header-cell>
-                                <mat-cell *matCellDef="let row">
-                                    <span class="client-name">{{ row.clientName }}</span>
-                                </mat-cell>
-                            </ng-container>
-
-                            <!-- Type Column -->
-                            <ng-container matColumnDef="type">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header> Servicio </mat-header-cell>
-                                <mat-cell *matCellDef="let row"> {{ row.appointmentType?.name || 'Estándar' }}
-                                </mat-cell>
-                            </ng-container>
-
-                            <!-- Notes Column -->
-                            <ng-container matColumnDef="notes">
-                                <mat-header-cell *matHeaderCellDef> Notas </mat-header-cell>
-                                <mat-cell *matCellDef="let row" class="text-truncate" style="max-width: 150px;">
-                                    <span [matTooltip]="row.notes">{{ row.notes }}</span>
-                                </mat-cell>
-                            </ng-container>
-
-                            <!-- Actions Column -->
-                            <ng-container matColumnDef="actions">
-                                <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
-                                <mat-cell *matCellDef="let row">
-                                    <button mat-icon-button color="primary" (click)="loadAppointmentForEdit(row.id)">
-                                        <mat-icon>visibility</mat-icon>
-                                    </button>
-                                    <button mat-icon-button color="warn" *ngIf="isAdmin"
-                                        (click)="$event.stopPropagation(); selectedAppointment={id: row.id}; deleteAppointment()">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </mat-cell>
-                            </ng-container>
-
-                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                            <mat-row *matRowDef="let row; columns: displayedColumns;" class="animate-row"></mat-row>
-                        </mat-table>
-
-                        <!-- Empty State -->
-                        <div class="empty-state p-5 text-center" *ngIf="dataSource && dataSource.data.length === 0">
-                            <mat-icon class="large-icon mb-3"
-                                style="font-size: 4rem; width: 64px; height: 64px;">event_busy</mat-icon>
-                            <h4>No hay citas registradas</h4>
-                            <p class="text-muted">No se encontraron citas para los criterios seleccionados.</p>
-                        </div>
-                    </div>
-                    <mat-paginator [pageSizeOptions]="[10, 25, 50]" aria-label="Seleccionar página"></mat-paginator>
-                </div>
-            </div>
+            <mat-paginator [pageSizeOptions]="[10, 25, 50]" aria-label="Seleccionar página"></mat-paginator>
         </div>
     </div>
+</div>
 
-    <!-- Appointment Detail Modal -->
-    <div class="appointment-detail-overlay" *ngIf="showAppointmentDetail && selectedAppointment"
-        (click)="closeAppointmentDetail()">
-        <mat-card class="appointment-detail-card card-glass-premium p-3" (click)="$event.stopPropagation()"
-            (dblclick)="$event.stopPropagation()" style="position: relative;">
-            <button class="close-btn-sexy" (click)="closeAppointmentDetail()">
-                <mat-icon>close</mat-icon>
-            </button>
-            <mat-card-header class="mb-4">
-                <mat-icon class="text-red">{{ isEditMode ? 'edit' : 'event' }}</mat-icon>
-                <mat-card-title class="text-white">{{ isEditMode ? 'Editar Cita' : 'Detalles de la Cita'
-                    }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <!-- View Mode -->
-                <div *ngIf="!isEditMode">
-                    <div class="detail-row mb-3">
-                        <span class="text-gray small block mb-1">CLIENTE</span>
-                        <div class="text-white font-weight-bold">{{ selectedAppointment.clientName }}</div>
-                    </div>
-                    <!-- Added Phone -->
-                    <div class="detail-row mb-3" *ngIf="selectedAppointment.clientPhone">
-                        <span class="text-gray small block mb-1">TELÉFONO</span>
-                        <div class="text-white">{{ selectedAppointment.clientPhone }}</div>
-                    </div>
-                    <div class="detail-row mb-3">
-                        <span class="text-gray small block mb-1">BARBERO</span>
-                        <div class="d-flex align-items-center">
-                            <span class="color-dot" [style.background-color]="selectedAppointment.color"
-                                style="margin-right: 10px;"></span>
-                            <span class="text-white">{{ selectedAppointment.barber?.name }}</span>
-                        </div>
-                    </div>
-                    <!-- Added Service -->
-                    <div class="detail-row mb-3" *ngIf="selectedAppointment.extendedProps?.appointmentType">
-                        <span class="text-gray small block mb-1">SERVICIO</span>
-                        <div class="text-white">{{ selectedAppointment.extendedProps.appointmentType.name }}</div>
-                    </div>
-                    <div class="detail-row mb-3">
-                        <span class="text-gray small block mb-1">HORARIO</span>
-                        <div class="text-white">
-                            {{ selectedAppointment.start | date:'dd/MM/yyyy' }} <br>
-                            {{ selectedAppointment.start | date:'HH:mm' }} - {{ selectedAppointment.end | date:'HH:mm'
-                            }}
-                        </div>
-                    </div>
-                    <div class="detail-row mb-3" *ngIf="selectedAppointment.extendedProps?.notes">
-                        <span class="text-gray small block mb-1">NOTAS</span>
-                        <div class="text-white small">{{ selectedAppointment.extendedProps.notes }}</div>
-                    </div>
-                </div>
 
-                <!-- Edit Mode -->
-                <div *ngIf="isEditMode" class="animate-fade-in">
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
+<!-- Appointment Detail Modal -->
+<!-- MASTER CLASSES: .modal-overlay-lux, .modal-card-lux -->
+<div class="modal-overlay-lux" *ngIf="showAppointmentDetail && selectedAppointment" (click)="closeAppointmentDetail()">
+    <mat-card class="modal-card-lux medium" (click)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
+        <button class="close-btn-sexy" (click)="closeAppointmentDetail()">
+            <mat-icon>close</mat-icon>
+        </button>
+        <mat-card-header class="mb-4">
+            <mat-icon class="text-red">edit</mat-icon>
+            <mat-card-title class="text-white">Editar Cita</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <!-- Edit Mode (Always Visible) -->
+            <div class="animate-fade-in">
+                <div class="booking-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- TOP GRID: 2 COLUMNS -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+                        <!-- LEFT CARD: PROFESSIONAL & SERVICE -->
+                        <div class="booking-card"
+                            style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">work</mat-icon>
+                                Profesional y Servicio
+                            </h6>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
                                 <mat-label>Barbero</mat-label>
                                 <mat-select [(ngModel)]="editBarberId">
                                     <mat-option *ngFor="let b of barbers" [value]="b.id">{{ b.name }}</mat-option>
                                 </mat-select>
                             </mat-form-field>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
                                 <mat-label>Servicio</mat-label>
                                 <mat-select [(ngModel)]="editTypeId">
                                     <mat-option *ngFor="let t of serviceTypes" [value]="t.id">{{ t.name }}</mat-option>
                                 </mat-select>
                             </mat-form-field>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
+
+                        <!-- RIGHT CARD: TIMING -->
+                        <div class="booking-card"
+                            style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">event</mat-icon>
+                                Fecha y Hora
+                            </h6>
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-3">
                                 <mat-label>Fecha</mat-label>
                                 <input matInput [matDatepicker]="editPicker" [(ngModel)]="editDate">
                                 <mat-datepicker-toggle matSuffix [for]="editPicker"></mat-datepicker-toggle>
                                 <mat-datepicker #editPicker></mat-datepicker>
                             </mat-form-field>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
-                                <mat-label>Hora Inicio</mat-label>
-                                <input matInput type="time" [(ngModel)]="editTime">
-                            </mat-form-field>
-                        </div>
-                        <div class="col-md-3 mb-2" *ngIf="isAdmin || isBarber">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
-                                <mat-label>Hora Fin</mat-label>
-                                <input matInput type="time" [(ngModel)]="editEndTime">
-                            </mat-form-field>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
-                                <mat-label>Estatus de la Cita</mat-label>
-                                <mat-select [(ngModel)]="editStatus">
-                                    <mat-option value="CONFIRMED">Confirmada</mat-option>
-                                    <mat-option value="PENDING">Pendiente</mat-option>
-                                    <mat-option value="COMPLETED">Completada</mat-option>
-                                    <mat-option value="CANCELLED">Cancelada</mat-option>
-                                    <mat-option value="NOSHOW">No Asistió</mat-option>
-                                </mat-select>
-                            </mat-form-field>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                    <mat-label>Inicio</mat-label>
+                                    <input matInput type="time" [(ngModel)]="editTime">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact"
+                                    *ngIf="isAdmin || isBarber">
+                                    <mat-label>Fin</mat-label>
+                                    <input matInput type="time" [(ngModel)]="editEndTime">
+                                </mat-form-field>
+                            </div>
                         </div>
                     </div>
-                    <mat-form-field appearance="outline" class="w-100 premium-search">
-                        <mat-label>Notas</mat-label>
-                        <textarea matInput [(ngModel)]="editNotes" rows="2"></textarea>
-                    </mat-form-field>
+
+                    <!-- BOTTOM CARD: STATUS & NOTES -->
+                    <div class="booking-card"
+                        style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <div class="d-flex justify-content-between align-items-center mb-2"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <h6 class="text-gray uppercase text-xs font-weight-bold mb-0 d-flex align-items-center">
+                                <mat-icon class="text-gold mr-2"
+                                    style="font-size: 16px; width: 16px; height: 16px;">content_paste</mat-icon>
+                                Estatus y Notas
+                            </h6>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact mt-2 mb-2">
+                            <mat-label>Estatus de la Cita</mat-label>
+                            <mat-select [(ngModel)]="editStatus">
+                                <mat-option value="CONFIRMED" class="text-success">Confirmada</mat-option>
+                                <mat-option value="PENDING" class="text-warning">Pendiente</mat-option>
+                                <mat-option value="COMPLETED" class="text-info">Completada</mat-option>
+                                <mat-option value="CANCELLED" class="text-danger">Cancelada</mat-option>
+                                <mat-option value="NOSHOW" class="text-muted">No Asistió</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                            <mat-label>Notas</mat-label>
+                            <textarea matInput [(ngModel)]="editNotes" rows="3"
+                                placeholder="Detalles o comentarios..."></textarea>
+                        </mat-form-field>
+                    </div>
                 </div>
-            </mat-card-content>
-            <mat-card-actions align="end">
-                <!-- Action Buttons for View Mode -->
-                <ng-container *ngIf="!isEditMode">
-                    <button mat-button class="text-white" (click)="closeAppointmentDetail()">Cerrar</button>
-                    <button mat-stroked-button class="brand-accent-pill px-4 mx-2 btn-edit-stroked" *ngIf="isAdmin"
-                        (click)="enterEditMode()">Editar</button>
-                    <button mat-stroked-button class="brand-accent-pill px-4 btn-delete-stroked" *ngIf="isAdmin"
-                        (click)="deleteAppointment()">Eliminar</button>
-                </ng-container>
+            </div>
+        </mat-card-content>
+        <mat-card-actions style="display: flex; justify-content: space-between; width: 100%; padding: 8px 16px;">
+            <!-- Action Buttons for Edit Mode -->
+            <div>
+                <button mat-stroked-button color="warn" class="px-4 btn-delete-stroked" *ngIf="isAdmin"
+                    (click)="cancelAppointmentStatus()">
+                    Cancelar Cita
+                </button>
+            </div>
+            <div>
+                <button mat-raised-button color="primary" class="brand-accent-pill px-4" [disabled]="isSaving"
+                    (click)="saveAppointment()">
+                    {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+                </button>
+            </div>
+        </mat-card-actions>
+    </mat-card>
+</div>
 
-                <!-- Action Buttons for Edit Mode -->
-                <ng-container *ngIf="isEditMode">
-                    <button mat-button class="text-white" (click)="cancelEdit()">Cancelar</button>
-                    <button mat-raised-button color="primary" class="brand-accent-pill px-4" [disabled]="isSaving"
-                        (click)="saveAppointment()">
-                        {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
-                    </button>
-                </ng-container>
-            </mat-card-actions>
-        </mat-card>
-    </div>
+<!-- UNIFIED BOOKING MODAL (Overlay) - RESTORED -->
+<!-- MASTER CLASSES: .modal-overlay-lux, .modal-card-lux -->
+<div class="modal-overlay-lux" [style.display]="showBookingModal ? 'flex' : 'none'" (click)="closeBookingModal()">
+    <mat-card class="modal-card-lux medium" (click)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
+        <button class="close-btn-sexy" (click)="closeBookingModal()">
+            <mat-icon>close</mat-icon>
+        </button>
+        <div class="modal-header-lux mb-5 pb-2 border-bottom border-white-alpha mt-2 position-relative"
+            style="margin-bottom: 3rem !important;">
+            <div class="d-flex align-items-center justify-content-center w-100">
+                <mat-icon class="text-red mr-2">add_circle</mat-icon>
+                <h3 class="text-white mb-0 font-weight-bold" style="font-size: 1.5rem;">Nueva Cita</h3>
+            </div>
 
-    <!-- UNIFIED BOOKING MODAL (Overlay) - RESTORED -->
-    <div class="appointment-detail-overlay" *ngIf="showBookingModal" (click)="closeBookingModal()">
-        <mat-card class="appointment-detail-card card-glass-premium p-4" (click)="$event.stopPropagation()"
-            (dblclick)="$event.stopPropagation()" style="position: relative;">
-            <button class="close-btn-sexy" (click)="closeBookingModal()">
-                <mat-icon>close</mat-icon>
-            </button>
-            <mat-card-header class="mb-4">
-                <mat-icon class="text-red">add_circle</mat-icon>
-                <mat-card-title class="text-white">Nueva Cita</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
+
+
+        </div>
+        <mat-card-content>
+            <!-- MAIN GRID CONTAINER -->
+            <div class="booking-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+
+                <!-- TOP SECTIONS: FORCE 2-COLUMN GRID -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+
+                    <!-- LEFT CARD: PROFESSIONAL -->
+                    <div class="booking-card"
+                        style="background: #ffffff; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">work</mat-icon>
+                            Profesional y Servicio
+                        </h6>
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-2">
                             <mat-label>Barbero</mat-label>
                             <mat-select [(ngModel)]="bookingBarberId" name="barberId">
                                 <mat-option *ngFor="let b of activeBarbers" [value]="b.id">{{ b.name }}</mat-option>
                             </mat-select>
                         </mat-form-field>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Tipo de Servicio</mat-label>
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                            <mat-label>Servicio</mat-label>
                             <mat-select [(ngModel)]="bookingTypeId" name="typeId">
                                 <mat-option *ngFor="let t of serviceTypes" [value]="t.id">{{ t.name }}</mat-option>
                             </mat-select>
                         </mat-form-field>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                    <!-- RIGHT CARD: TIMING -->
+                    <div class="booking-card"
+                        style="background: #ffffff; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">event</mat-icon>
+                            Fecha y Hora
+                        </h6>
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-2">
                             <mat-label>Fecha</mat-label>
                             <input matInput [matDatepicker]="picker" [(ngModel)]="bookingDate">
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                             <mat-datepicker #picker></mat-datepicker>
                         </mat-form-field>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Hora Inicio</mat-label>
-                            <input matInput type="time" step="900" [(ngModel)]="bookingTime"
-                                (ngModelChange)="onStartTimeChange()">
-                        </mat-form-field>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Hora Fin</mat-label>
-                            <input matInput type="time" step="900" [(ngModel)]="bookingEndTime">
-                        </mat-form-field>
-                    </div>
-                </div>
-
-                <!-- CLIENT VS GUEST SELECTION (ADMIN ONLY) -->
-                <div *ngIf="isAdmin" class="d-flex justify-content-end mb-3 animate-fade-in">
-                    <mat-slide-toggle [(ngModel)]="isGuestBooking" color="warn">
-                        <span class="text-white small">{{ isGuestBooking ? 'Invitado' : 'Cliente Registrado' }}</span>
-                    </mat-slide-toggle>
-                </div>
-
-                <!-- REGISTERED CLIENT SEARCH -->
-                <div *ngIf="!isGuestBooking" class="animate-fade-in">
-                    <mat-form-field appearance="outline" class="w-100 premium-search">
-                        <mat-label>Buscar Cliente</mat-label>
-                        <input type="text" matInput [formControl]="clientControl" [matAutocomplete]="auto">
-                        <mat-icon matSuffix class="text-white-50">search</mat-icon>
-                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayClientFn"
-                            (optionSelected)="onClientSelected($event)">
-                            <mat-option class="premium-option new-client-option"
-                                [value]="{id:'NEW', name:'+ Crear Nuevo Cliente'}">
-                                <mat-icon class="text-gold">add_circle_outline</mat-icon>
-                                <span class="text-gold font-weight-bold">Crear Nuevo Cliente</span>
-                            </mat-option>
-                            <mat-option *ngFor="let client of filteredClients | async" [value]="client"
-                                class="premium-option">
-                                <div class="d-flex align-items-center">
-                                    <img [src]="client.photoUrl || 'assets/default-avatar.png'" class="avatar-xs me-2"
-                                        style="width:24px;height:24px;border-radius:50%;">
-                                    <span>{{ client.name }}</span>
-                                    <span class="small text-muted ms-2">({{ client.email }})</span>
-                                </div>
-                            </mat-option>
-                        </mat-autocomplete>
-                    </mat-form-field>
-                </div>
-
-                <!-- GUEST / MANUAL DETAILS FORM -->
-                <div *ngIf="!isLoggedIn || (isAdmin && isGuestBooking)" class="animate-fade-in">
-                    <mat-form-field appearance="outline" class="w-100 mb-2 premium-search">
-                        <mat-label>{{ isAdmin ? 'Nombre del Invitado' : 'Nombre Completo' }}</mat-label>
-                        <input matInput [(ngModel)]="bookingGuestName" placeholder="Ej. Juan Pérez">
-                    </mat-form-field>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
-                                <mat-label>Correo</mat-label>
-                                <input matInput type="email" [(ngModel)]="bookingGuestEmail"
-                                    placeholder="juan@ejemplo.com">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                <mat-label>Inicio</mat-label>
+                                <input matInput type="time" step="900" [(ngModel)]="bookingTime"
+                                    (ngModelChange)="onStartTimeChange()">
                             </mat-form-field>
-                        </div>
-                        <div class="col-md-6">
-                            <mat-form-field appearance="outline" class="w-100 premium-search">
-                                <mat-label>Teléfono</mat-label>
-                                <input matInput [(ngModel)]="bookingGuestPhone" placeholder="555-0000">
+                            <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                <mat-label>Fin</mat-label>
+                                <input matInput type="time" step="900" [(ngModel)]="bookingEndTime">
                             </mat-form-field>
                         </div>
                     </div>
                 </div>
 
-                <mat-form-field appearance="outline" class="w-100 premium-search">
-                    <mat-label>Notas adicionales</mat-label>
-                    <textarea matInput [(ngModel)]="bookingNotes" rows="2"></textarea>
-                </mat-form-field>
-            </mat-card-content>
-            <mat-card-actions align="end">
-                <button mat-button class="text-white" (click)="closeBookingModal()">Cancelar</button>
-                <button mat-raised-button color="primary" class="brand-accent-pill px-4"
-                    (click)="submitBooking()">Confirmar
-                    Cita</button>
-            </mat-card-actions>
-        </mat-card>
-    </div>
+                <!-- MIDDLE CARD: CLIENT -->
+                <div class="booking-card"
+                    style="background: #ffffff; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                    <div class="d-flex align-items-center mb-2 w-100"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; justify-content: space-between !important;">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-0 d-flex align-items-center">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">person</mat-icon>
+                            Información del Cliente
+                        </h6>
+                        <div>
+                            <mat-slide-toggle [(ngModel)]="isGuestBooking" color="warn" *ngIf="isAdmin">
+                                <span class="text-white small">{{ isGuestBooking ? 'Modo Invitado' : 'Cliente
+                                    Registrado' }}</span>
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
 
-    <!-- QUICK CLIENT CREATION MODAL OVERLAY -->
-    <div class="appointment-detail-overlay" *ngIf="showQuickClientModal" (click)="closeQuickClientModal()">
-        <mat-card class="appointment-detail-card card-compact card-glass-premium"
-            style="width: 100%; position: relative;" (click)="$event.stopPropagation()"
-            (dblclick)="$event.stopPropagation()">
-            <button class="close-btn-sexy" (click)="closeQuickClientModal()">
-                <mat-icon>close</mat-icon>
-            </button>
-            <mat-card-header class="mb-4">
-                <mat-icon class="text-gold">person_add</mat-icon>
-                <mat-card-title class="text-white">Nuevo Cliente</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <p class="text-white-50 mb-4 small">Ingrese los datos para registrar al cliente.</p>
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                    <!-- REGISTERED CLIENT SEARCH -->
+                    <div *ngIf="!isGuestBooking" class="animate-fade-in mt-3">
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                            <mat-label>Buscar Cliente</mat-label>
+                            <input type="text" matInput [formControl]="clientControl" [matAutocomplete]="auto">
+                            <mat-icon matSuffix class="text-white-50">search</mat-icon>
+                            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayClientFn"
+                                (optionSelected)="onClientSelected($event)">
+                                <mat-option class="premium-option new-client-option"
+                                    [value]="{id:'NEW', name:'+ Crear Nuevo Cliente'}">
+                                    <mat-icon class="text-gold">add_circle_outline</mat-icon>
+                                    <span class="text-gold font-weight-bold">Crear Nuevo Cliente</span>
+                                </mat-option>
+                                <mat-option *ngFor="let client of filteredClients | async" [value]="client"
+                                    class="premium-option">
+                                    <div class="d-flex align-items-center">
+                                        <img [src]="client.photoUrl || 'assets/default-avatar.png'"
+                                            class="avatar-xs me-2" style="width:24px;height:24px;border-radius:50%;">
+                                        <span>{{ client.name }}</span>
+                                        <span class="small text-muted ms-2">({{ client.email }})</span>
+                                    </div>
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- GUEST FORM -->
+                    <div *ngIf="!isLoggedIn || (isAdmin && isGuestBooking)" class="animate-fade-in mt-3">
+                        <div class="row">
+                            <div class="col-md-12 mb-2">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                    <mat-label>{{ isAdmin ? 'Nombre del Invitado' : 'Nombre Completo' }}</mat-label>
+                                    <input matInput [(ngModel)]="bookingGuestName" placeholder="Ej. Juan Pérez">
+                                </mat-form-field>
+                            </div>
+                            <div class="col-6 pr-1 mb-1">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                    <mat-label>Correo</mat-label>
+                                    <input matInput type="email" [(ngModel)]="bookingGuestEmail"
+                                        placeholder="juan@ejemplo.com">
+                                </mat-form-field>
+                            </div>
+                            <div class="col-6 pl-1 mb-1">
+                                <mat-form-field appearance="outline" class="w-100 premium-search-compact">
+                                    <mat-label>Teléfono</mat-label>
+                                    <input matInput [(ngModel)]="bookingGuestPhone" placeholder="555-0000">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM CARD: NOTES -->
+                <div class="booking-card"
+                    style="background: #ffffff; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                    <h6 class="text-gray uppercase text-xs font-weight-bold mb-2 d-flex align-items-center"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                        <mat-icon class="text-gold mr-2"
+                            style="font-size: 16px; width: 16px; height: 16px;">comment</mat-icon>
+                        Notas y Comentarios
+                    </h6>
+                    <mat-form-field appearance="outline" class="w-100 premium-search-compact mt-2">
+                        <mat-label>Escribe aquí cualquier detalle importante...</mat-label>
+                        <textarea matInput [(ngModel)]="bookingNotes" rows="4" style="resize: none;"></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+        </mat-card-content>
+        <mat-card-actions align="end" class="pt-0 pb-1">
+            <button mat-raised-button color="primary" class="brand-accent-pill px-4" (click)="submitBooking()">Confirmar
+                Cita</button>
+        </mat-card-actions>
+    </mat-card>
+</div>
+
+<!-- QUICK CLIENT CREATION MODAL OVERLAY -->
+<!-- MASTER CLASSES: .modal-overlay-lux, .modal-card-lux -->
+<div class="modal-overlay-lux" *ngIf="showQuickClientModal" (click)="closeQuickClientModal()">
+    <mat-card class="modal-card-lux medium" (click)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
+        <button class="close-btn-sexy" (click)="closeQuickClientModal()">
+            <mat-icon>close</mat-icon>
+        </button>
+        <mat-card-header class="mb-2">
+            <mat-icon class="text-gold">person_add</mat-icon>
+            <mat-card-title class="text-white">Nuevo Cliente</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <p class="text-white-50 mb-4 small" style="text-align: center;">Complete la información para registrar un
+                nuevo cliente.</p>
+
+            <div class="booking-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+                    <!-- LEFT CARD: PERSONAL INFO -->
+                    <div class="booking-card"
+                        style="background: #ffffff; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">person</mat-icon>
+                            Información Personal
+                        </h6>
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-2">
                             <mat-label>Nombre Completo</mat-label>
                             <input matInput [(ngModel)]="newClient.name" placeholder="Ej. Ana García" required>
                             <mat-icon matSuffix class="text-gold">person</mat-icon>
                         </mat-form-field>
-                    </div>
-                    <div class="col-12 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
-                            <mat-label>Correo Electrónico</mat-label>
-                            <input matInput type="email" [(ngModel)]="newClient.email" placeholder="ana@email.com"
-                                required>
-                            <mat-icon matSuffix class="text-gold">email</mat-icon>
-                        </mat-form-field>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact">
                             <mat-label>Teléfono</mat-label>
                             <input matInput [(ngModel)]="newClient.phone" placeholder="555-1234">
                             <mat-icon matSuffix class="text-gold">phone</mat-icon>
                         </mat-form-field>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <mat-form-field appearance="outline" class="w-100 premium-search">
+
+                    <!-- RIGHT CARD: ACCOUNT INFO -->
+                    <div class="booking-card"
+                        style="background: #ffffff; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                        <h6 class="text-gray uppercase text-xs font-weight-bold mb-3 d-flex align-items-center"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <mat-icon class="text-gold mr-2"
+                                style="font-size: 16px; width: 16px; height: 16px;">lock</mat-icon>
+                            Cuenta de Acceso
+                        </h6>
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact mb-2">
+                            <mat-label>Correo Electrónico</mat-label>
+                            <input matInput type="email" [(ngModel)]="newClient.email" placeholder="ana@email.com"
+                                required>
+                            <mat-icon matSuffix class="text-gold">email</mat-icon>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-100 premium-search-compact">
                             <mat-label>Contraseña</mat-label>
                             <input matInput type="password" [(ngModel)]="newClient.password" required>
                             <mat-icon matSuffix class="text-gold">lock</mat-icon>
                         </mat-form-field>
                     </div>
                 </div>
-            </mat-card-content>
-            <mat-card-actions align="end" class="pt-3">
-                <button mat-button class="text-white" (click)="closeQuickClientModal()">Cancelar</button>
-                <button mat-raised-button class="brand-accent-pill px-4" (click)="saveQuickClient()"
-                    [disabled]="!newClient.name || !newClient.email || !newClient.password">
-                    Registrar
-                </button>
-            </mat-card-actions>
-        </mat-card>
-    </div>
+            </div>
+        </mat-card-content>
+        <mat-card-actions style="display: flex; justify-content: space-between; width: 100%; padding: 8px 16px;">
+            <button mat-stroked-button color="warn" class="px-4 btn-delete-stroked" (click)="closeQuickClientModal()">
+                Cancelar
+            </button>
+            <button mat-raised-button color="primary" class="brand-accent-pill px-4" (click)="saveQuickClient()"
+                [disabled]="!newClient.name || !newClient.email || !newClient.password">
+                Registrar Cliente
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>

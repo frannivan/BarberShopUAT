@@ -7,17 +7,21 @@ import { filter } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-user-appointments',
     standalone: true,
-    imports: [CommonModule, DatePipe, MatCardModule, MatListModule, MatButtonModule],
+    imports: [CommonModule, DatePipe, MatCardModule, MatListModule, MatButtonModule, MatIconModule],
     templateUrl: './user-appointments.component.html',
     styleUrls: ['./user-appointments.component.css']
 })
-export class UserAppointmentsComponent implements OnInit {
+export class UserAppointmentsComponent implements OnInit, OnDestroy {
     private routerSubscription: Subscription | undefined;
     appointments: any[] = [];
+    todayAppointments: any[] = [];
+    upcomingAppointments: any[] = [];
+    pastAppointments: any[] = [];
     loading = true;
 
     constructor(
@@ -47,7 +51,7 @@ export class UserAppointmentsComponent implements OnInit {
         this.loading = true;
         this.appointmentService.getAppointments().subscribe({
             next: data => {
-                this.appointments = this.sortAppointments(data);
+                this.processAppointments(data);
                 this.loading = false;
                 this.cdr.detectChanges();
             },
@@ -59,37 +63,59 @@ export class UserAppointmentsComponent implements OnInit {
         });
     }
 
-    private sortAppointments(appointments: any[]): any[] {
+    private processAppointments(appointments: any[]): void {
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
+        // Create "Today" date object at 00:00:00 local time
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-        const todayApts: any[] = [];
-        const futureApts: any[] = [];
-        const pastApts: any[] = [];
+        // Create "Tomorrow" date object at 00:00:00 local time
+        const tomorrowStart = new Date(todayStart);
+        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+        const todayList: any[] = [];
+        const upcomingList: any[] = [];
+        const pastList: any[] = [];
 
         appointments.forEach(apt => {
-            const aptDate = new Date(apt.startTime);
-            const aptDateStr = aptDate.toISOString().split('T')[0];
+            const dateStr = apt.startTime.includes('T') ? apt.startTime : apt.startTime.replace(' ', 'T');
+            const aptDate = new Date(dateStr);
+            const aptDayStart = new Date(aptDate.getFullYear(), aptDate.getMonth(), aptDate.getDate());
 
-            if (aptDateStr === todayStr) {
-                todayApts.push(apt);
-            } else if (aptDate > now) {
-                futureApts.push(apt);
+            // Determine End Time
+            let aptEnd: Date;
+            if (apt.endTime) {
+                aptEnd = new Date(apt.endTime.includes('T') ? apt.endTime : apt.endTime.replace(' ', 'T'));
             } else {
-                pastApts.push(apt);
+                aptEnd = new Date(aptDate.getTime() + 60 * 60 * 1000); // Default 1 Hour
+            }
+
+            // Add date object for sorting (keep original time)
+            const enhancedApt = { ...apt, _dateObj: aptDate };
+
+            // Logic:
+            // 1. If End Time has PASSED (< now), it goes to Past.
+            // 2. Else: Sort into Today or Upcoming based on Day.
+            if (aptEnd.getTime() < now.getTime()) {
+                pastList.push(enhancedApt);
+            } else if (aptDayStart.getTime() === todayStart.getTime()) {
+                todayList.push(enhancedApt);
+            } else if (aptDayStart.getTime() >= tomorrowStart.getTime()) {
+                upcomingList.push(enhancedApt);
+            } else {
+                // Technically handled by #1, but catch-all for old dates not caught (unlikely)
+                pastList.push(enhancedApt);
             }
         });
 
-        // 1. Today: Ascending (Earliest first)
-        todayApts.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+        // Sort Today and Upcoming: Ascending (Earliest first)
+        this.todayAppointments = todayList.sort((a, b) => a._dateObj.getTime() - b._dateObj.getTime());
+        this.upcomingAppointments = upcomingList.sort((a, b) => a._dateObj.getTime() - b._dateObj.getTime());
 
-        // 2. Future: Ascending (Nearest date first)
-        futureApts.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+        // Sort Past: Descending (Most recent first)
+        this.pastAppointments = pastList.sort((a, b) => b._dateObj.getTime() - a._dateObj.getTime());
 
-        // 3. Past: Descending (Most recent first)
-        pastApts.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-
-        return [...todayApts, ...futureApts, ...pastApts];
+        // For compatibility
+        this.appointments = [...this.todayAppointments, ...this.upcomingAppointments, ...this.pastAppointments];
     }
 
     cancelAppointment(id: number): void {
@@ -97,13 +123,38 @@ export class UserAppointmentsComponent implements OnInit {
             this.appointmentService.cancelAppointment(id).subscribe({
                 next: () => {
                     alert('Appointment cancelled successfully!');
-                    this.ngOnInit(); // Reload appointments
+                    this.loadData(); // Reload appointments
                 },
-                error: err => {
+                error: (err: any) => {
                     console.error(err);
                     alert('Failed to cancel appointment.');
                 }
             });
         }
+    }
+
+    isInProgress(appointment: any): boolean {
+        // If status is CANCELLED or COMPLETED, it's not "active" in the sense of "happening now" visually as pending
+        if (appointment.status === 'CANCELLED' || appointment.status === 'COMPLETED') {
+            return false;
+        }
+
+        const now = new Date();
+        const start = new Date(appointment.startTime.includes('T') ? appointment.startTime : appointment.startTime.replace(' ', 'T'));
+
+        // Assume 1 hour duration if no end time, or use end time if available
+        let end: Date;
+        if (appointment.endTime) {
+            end = new Date(appointment.endTime.includes('T') ? appointment.endTime : appointment.endTime.replace(' ', 'T'));
+        } else {
+            end = new Date(start.getTime() + 60 * 60 * 1000); // +1 Hour default
+        }
+
+        const inProgress = now >= start && now <= end;
+        if (inProgress) {
+            console.log('ACTIVE APPOINTMENT FOUND:', { id: appointment.id, now, start, end, inProgress });
+        }
+
+        return inProgress;
     }
 }

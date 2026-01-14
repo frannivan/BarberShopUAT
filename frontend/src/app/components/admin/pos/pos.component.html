@@ -1,0 +1,268 @@
+<div class="pos-container animate-fade-in">
+    <!-- 1. LEFT: CATEGORIES & FILTERS (20%) -->
+    <div class="pos-sidebar-left card-glass-premium">
+        <div class="pos-header mb-3">
+            <h3 class="text-white font-weight-bold mb-0">Menú</h3>
+        </div>
+
+        <div class="category-list">
+            <div *ngFor="let cat of categories; let i = index" class="category-item"
+                [class.active]="selectedCategory === cat" (click)="selectCategory(i)">
+                <span class="category-icon">
+                    <i class="fas"
+                        [ngClass]="{'fa-cut': i===0, 'fa-spray-can': i===1, 'fa-tags': i===2, 'fa-calendar-check': i===3}"></i>
+                </span>
+                <span class="category-name">{{ cat }}</span>
+            </div>
+
+            <div class="mt-4 border-top border-white-alpha pt-3">
+                <button class="btn-action-lux w-100" style="background: #2e7d32; padding: 10px; font-size: 0.9rem;"
+                    (click)="navigateToCash()">
+                    <i class="fas fa-wallet mr-2"></i> Corte de Caja
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-auto user-search-widget">
+            <mat-form-field appearance="outline" class="w-100 premium-search-dark">
+                <mat-label>Cliente (Opcional)</mat-label>
+                <input matInput placeholder="Buscar cliente...">
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <!-- 2. CENTER: VISUAL GRID (50%) -->
+    <div class="pos-main-grid">
+        <div class="grid-header mb-3 d-flex justify-content-between align-items-center">
+            <h2 class="section-title mb-0 text-white">{{ selectedCategory }}</h2>
+            <div class="search-bar">
+                <input type="text" class="search-input-lux" placeholder="Buscar ítem...">
+            </div>
+        </div>
+
+        <div class="items-grid-container" *ngIf="selectedCategory !== 'Citas'">
+            <!-- Grid Items -->
+            <div class="pos-card animate-pop" *ngFor="let item of filteredGridItems" (click)="addToCart(item)">
+                <div class="card-image-wrapper">
+                    <!-- Showing Icon if image fails or as placeholder -->
+                    <mat-icon class="large-card-icon" *ngIf="item.icon">{{ item.icon }}</mat-icon>
+                </div>
+                <div class="card-info">
+                    <h4 class="item-name">{{ item.name }}</h4>
+                    <p class="item-price"
+                        *ngIf="item.type !== 'PROMOTION' || (item.price && item.price > 0) || item.discountPercentage">
+                        <ng-container *ngIf="item.price && item.price > 0">
+                            ${{ item.price | number:'1.2-2' }}
+                        </ng-container>
+                        <ng-container *ngIf="(!item.price || item.price <= 0) && item.discountPercentage">
+                            {{ item.discountPercentage }}% OFF
+                        </ng-container>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIST VIEW FOR APPOINTMENTS -->
+        <div class="appointments-list-container" *ngIf="selectedCategory === 'Citas'">
+            <div class="appointment-row card-glass-premium d-flex align-items-center mb-2 p-3 animate-slide-in"
+                *ngFor="let item of filteredGridItems" style="gap: 15px;">
+
+                <!-- Time (15%) -->
+                <div class="time-badge text-center" style="width: 15%;">
+                    <span class="d-block font-weight-bold text-gold" style="font-size: 1.2rem;">{{ item.displayTime
+                        }}</span>
+                </div>
+
+                <!-- Info (Client & Service) (35%) -->
+                <div class="d-flex flex-column justify-content-center" style="width: 35%;">
+                    <h4 class="text-white mb-0 font-weight-bold text-truncate" [title]="item.clientName">{{
+                        item.clientName }}</h4>
+                    <p class="text-gray mb-0 small text-truncate">{{ item.serviceName }}</p>
+                </div>
+
+                <!-- Barber (20%) -->
+                <div class="d-flex align-items-center" style="width: 20%;">
+                    <mat-icon class="text-gold mr-1"
+                        style="font-size: 18px; width:18px; height:18px;">content_cut</mat-icon>
+                    <span class="text-white small text-truncate">{{ item.barberName }}</span>
+                </div>
+
+                <!-- Status (15%) -->
+                <div class="status-badge text-center" style="width: 15%;">
+                    <span class="badge w-100" [ngClass]="item.isPaid ? 'badge-success-lux' : 'badge-warning-lux'">
+                        {{ item.isPaid ? 'PAGADO' : 'PENDIENTE' }}
+                    </span>
+                </div>
+
+                <!-- Action (15%) -->
+                <div class="text-right" style="width: 15%;">
+                    <button class="btn-icon-sm brand-accent-pill px-3 w-100" (click)="addToCart(item)"
+                        [disabled]="item.isPaid">
+                        <mat-icon>add_shopping_cart</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="empty-state text-center p-5" *ngIf="filteredGridItems.length === 0">
+                <p class="text-white-50">No hay citas para hoy.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. RIGHT: TICKET / CART (30%) -->
+    <div class="pos-ticket-panel card-glass-premium">
+        <div
+            class="ticket-header mb-3 pb-2 border-bottom border-white-alpha d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="text-white font-weight-bold mb-0 d-inline-block mr-2">Ticket Actual</h3>
+                <span class="badge badge-success-lux">Venta Nueva</span>
+            </div>
+            <button class="btn-icon-sm text-gray hover-white" (click)="clearCart()" title="Limpiar Ticket">
+                <mat-icon>delete_sweep</mat-icon>
+            </button>
+        </div>
+
+        <div class="ticket-items-scroll">
+            <div class="ticket-item animate-slide-in" *ngFor="let line of cartItems$ | async">
+                <!-- CONSTRAINED FLUID LAYOUT -->
+                <div class="d-flex align-items-center w-100" style="gap: 6px; overflow: hidden; padding-right: 2px;">
+
+                    <!-- 1. Qty Badge -->
+                    <span class="badge-pill-dark flex-shrink-0"
+                        style="font-size: 0.75rem; min-width: 22px; text-align: center;">
+                        {{ line.quantity }}
+                    </span>
+
+                    <!-- 2. Item Info -->
+                    <div class="d-flex flex-column flex-shrink-1"
+                        style="min-width: 60px; max-width: 30%; overflow: hidden;">
+                        <span class="item-desc text-truncate" style="font-size: 0.85rem; line-height: 1.2;"
+                            [title]="line.name">
+                            {{ line.name }}
+                        </span>
+                        <span class="text-muted" style="font-size: 0.7rem;">${{ line.price }}</span>
+                    </div>
+
+                    <!-- 3. Barber Selector -->
+                    <div class="flex-grow-1" style="min-width: 0; overflow: hidden;">
+                        <div *ngIf="line.type === 'SERVICE'" class="w-100">
+                            <mat-form-field appearance="outline"
+                                class="w-100 compact-select-dark no-subscript dense-form-field">
+                                <mat-select [value]="line.barberId"
+                                    (selectionChange)="assignProfessional(line.id, $event.value)" placeholder="Prof.">
+                                    <mat-option *ngFor="let b of barbers" [value]="b.id"
+                                        style="font-size: 0.8rem; height: 32px;">
+                                        {{ b.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- 4. Price & Del -->
+                    <div class="d-flex align-items-center justify-content-end flex-shrink-0 ml-1" style="width: 90px;">
+                        <span class="item-total mr-2 font-weight-bold" style="font-size: 0.9rem;">${{ line.subtotal |
+                            number:'1.2-2' }}</span>
+                        <button class="btn-icon-sm text-red p-0 d-flex align-items-center justify-content-center"
+                            (click)="removeFromCart(line.id)" style="width: 24px; height: 24px;">
+                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">close</mat-icon>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div *ngIf="(cartItems$ | async)?.length === 0" class="empty-ticket text-center mt-5">
+                <mat-icon class="text-white-50"
+                    style="font-size: 48px; width: 48px; height: 48px;">shopping_cart</mat-icon>
+                <p class="text-white-50 mt-2">Ticket vacío</p>
+            </div>
+        </div>
+
+        <div class="ticket-footer mt-auto pt-3 border-top border-white-alpha">
+            <div class="summary-row d-flex justify-content-between mb-2">
+                <span class="text-gray">Subtotal</span>
+                <span class="text-white">${{ cartTotal$ | async | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row d-flex justify-content-between mb-4">
+                <span class="text-gold font-weight-bold" style="font-size: 1.5rem;">TOTAL</span>
+                <span class="text-gold font-weight-bold" style="font-size: 1.5rem;">${{ cartTotal$ | async |
+                    number:'1.2-2' }}</span>
+            </div>
+
+            <button class="btn-checkout-lux w-100" (click)="processPayment()" [disabled]="(cartTotal$ | async) === 0">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <span>COBRAR</span>
+                    <mat-icon>arrow_forward</mat-icon>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CHECKOUT MODAL OVERLAY -->
+<div class="modal-overlay-lux" *ngIf="showCheckoutModal" (click)="closeCheckoutModal()">
+    <div class="modal-card-lux medium" (click)="$event.stopPropagation()">
+        <button class="close-btn-sexy" (click)="closeCheckoutModal()">
+            <mat-icon>close</mat-icon>
+        </button>
+
+        <div class="modal-header mb-4">
+            <h2 class="section-title text-white mb-0">Cobrar Ticket</h2>
+            <p class="text-gray small">Seleccione método de pago</p>
+        </div>
+
+        <div class="checkout-content">
+            <div class="total-display mb-4 text-center">
+                <span class="text-gray d-block mb-1">Total a Pagar</span>
+                <h1 class="text-gold" style="font-size: 3rem; font-weight: bold;">
+                    ${{ cartTotal$ | async | number:'1.2-2' }}
+                </h1>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="payment-methods-grid mb-4">
+                <div class="pm-option" [class.active]="paymentMethod === 'CASH'" (click)="paymentMethod = 'CASH'">
+                    <mat-icon>payments</mat-icon>
+                    <span>Efectivo</span>
+                </div>
+                <div class="pm-option" [class.active]="paymentMethod === 'CARD'" (click)="paymentMethod = 'CARD'">
+                    <mat-icon>credit_card</mat-icon>
+                    <span>Tarjeta</span>
+                </div>
+                <div class="pm-option" [class.active]="paymentMethod === 'TRANSFER'"
+                    (click)="paymentMethod = 'TRANSFER'">
+                    <mat-icon>account_balance</mat-icon>
+                    <span>Transf.</span>
+                </div>
+            </div>
+
+            <!-- Cash Calculator -->
+            <div class="cash-calc" *ngIf="paymentMethod === 'CASH'">
+                <mat-form-field appearance="outline" class="w-100 premium-input-dark">
+                    <mat-label>Monto Recibido</mat-label>
+                    <input matInput type="number" [(ngModel)]="amountReceived" (keyup)="calculateChange()">
+                    <span matPrefix class="mr-2">$</span>
+                </mat-form-field>
+
+                <div class="change-display d-flex justify-content-between align-items-center p-3 rounded"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <span class="text-white">Cambio:</span>
+                    <span class="text-success font-weight-bold" style="font-size: 1.2rem;">
+                        ${{ changeAmount | number:'1.2-2' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer mt-4 d-flex justify-content-end">
+            <button mat-stroked-button color="warn" class="mr-3" (click)="closeCheckoutModal()">Cancelar</button>
+            <button mat-raised-button color="primary" class="brand-accent-pill px-5 py-1" (click)="confirmSale()"
+                [disabled]="paymentMethod === 'CASH' && changeAmount < 0">
+                <mat-icon class="mr-2">check_circle</mat-icon>
+                Confirmar Pago
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,125 @@
+<div class="cash-container p-4 fade-in">
+    <div class="header-section mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title-lux mb-1">Caja y Movimientos</h1>
+            <p class="text-muted-lux">Control de flujo de efectivo y cortes</p>
+        </div>
+        <div class="actions">
+            <button mat-flat-button color="warn" (click)="openWithdrawalDialog()" class="mr-2">
+                <mat-icon>money_off</mat-icon>
+                Registrar Retiro
+            </button>
+            <button mat-flat-button color="primary" (click)="openCutDialog()">
+                <mat-icon>inventory</mat-icon>
+                Corte de Caja
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid mb-4" *ngIf="state">
+        <mat-card class="stat-card glass-panel primary-stat">
+            <mat-card-content>
+                <div class="stat-label">Dinero en Caja (Efectivo)</div>
+                <div class="stat-value">{{ state.cashBalance | currency }}</div>
+                <mat-icon class="stat-icon">point_of_sale</mat-icon>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card glass-panel">
+            <mat-card-content>
+                <div class="stat-label">Total Ingresos (Ciclo Actual)</div>
+                <div class="stat-value text-success">{{ state.totalRevenue | currency }}</div>
+                <mat-icon class="stat-icon">trending_up</mat-icon>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card glass-panel">
+            <mat-card-content>
+                <div class="stat-label">Total Retiros (Ciclo Actual)</div>
+                <div class="stat-value text-danger">{{ state.totalWithdrawals | currency }}</div>
+                <mat-icon class="stat-icon">trending_down</mat-icon>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card glass-panel">
+            <mat-card-content>
+                <div class="stat-label">Último Corte</div>
+                <div class="stat-value date-value">
+                    {{ state.lastCutDate ? (state.lastCutDate | date:'medium') : 'Nunca' }}
+                </div>
+                <mat-icon class="stat-icon">history</mat-icon>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- History Table -->
+    <div class="history-section glass-panel p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="m-0">Historial de Movimientos</h3>
+            <button mat-stroked-button color="primary" (click)="printFullReport()" [disabled]="history.length === 0">
+                <mat-icon>print</mat-icon>
+                Imprimir Reporte
+            </button>
+        </div>
+
+        <table mat-table [dataSource]="history" class="w-100 bg-transparent">
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef> Fecha </th>
+                <td mat-cell *matCellDef="let element"> {{element.date | date:'short'}} </td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef> Tipo </th>
+                <td mat-cell *matCellDef="let element">
+                    <span class="badge" [class.bg-success]="element.type === 'SALE'"
+                        [class.bg-danger]="element.type === 'WITHDRAWAL'">
+                        {{ element.type === 'SALE' ? 'VENTA' : 'RETIRO' }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <!-- Description Column -->
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef> Descripción </th>
+                <td mat-cell *matCellDef="let element"> {{element.description}} </td>
+            </ng-container>
+
+            <!-- User Column -->
+            <ng-container matColumnDef="user">
+                <th mat-header-cell *matHeaderCellDef> Usuario </th>
+                <td mat-cell *matCellDef="let element"> {{element.user}} </td>
+            </ng-container>
+
+            <!-- Amount Column -->
+            <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef> Monto </th>
+                <td mat-cell *matCellDef="let element" [class.text-success]="element.amount > 0"
+                    [class.text-danger]="element.amount < 0">
+                    {{ element.amount | currency }}
+                </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="primary" *ngIf="element.type === 'SALE'"
+                        (click)="printTicket(element)" matTooltip="Imprimir Ticket">
+                        <mat-icon>print</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <div class="p-3 text-center text-muted" *ngIf="history.length === 0">
+            No hay movimientos registrados en este ciclo.
+        </div>
+    </div>
+</div>

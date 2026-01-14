@@ -16,8 +16,16 @@ INSERT INTO barbers (name, photo_url, active, user_id) VALUES
 ('Sarah', 'assets/barbers/sarah.png', true, (SELECT id FROM users WHERE email='sarah@barbershop.com'));
 
 -- Tipos de Cita
-INSERT INTO appointment_types (name, price, duration_minutes, color) VALUES 
-('Corte Clásico', 15.00, 30, '#4CAF50'),
-('Barba y Corte', 25.00, 45, '#2196F3'),
-('Afeitado Premium', 20.00, 30, '#FFC107'),
-('Tinte de Cabello', 35.00, 60, '#9C27B0');
+-- Tipos de Cita (Forzando IDs para coincidir con POS Mock)
+MERGE INTO appointment_types (id, name, price, duration_minutes, color) VALUES 
+(1, 'Corte Clásico', 250.00, 30, '#4CAF50'),
+(2, 'Barba', 150.00, 45, '#2196F3'),
+(3, 'Tinte', 500.00, 60, '#9C27B0'),
+(4, 'Mascarilla', 100.00, 15, '#FFC107'),
+(5, 'Corte Niño', 200.00, 30, '#E91E63');
+
+-- Productos (Mock IDs del Frontend)
+MERGE INTO products (id, name, price, stock, image_url) VALUES 
+(101, 'Cera Mate', 180.00, 50, 'assets/products/wax.png'),
+(102, 'Gel Fijador', 150.00, 30, 'assets/products/gel.png'),
+(103, 'Shampoo', 220.00, 20, 'assets/products/shampoo.png');

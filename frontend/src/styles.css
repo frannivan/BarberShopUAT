@@ -74,13 +74,17 @@ h6 {
     border-bottom: 1px solid var(--border-subtle);
 }
 
+/* Updated Card Glass Premium (Matches Modal Lux) */
 .card-glass-premium {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: rgba(30, 30, 35, 0.85) !important;
+    /* Slightly more transparent than modal */
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    padding: 1.5rem !important;
+    /* Reset padding */
 }
 
 .card-glass {
@@ -206,31 +210,53 @@ body .premium-search .mat-mdc-select-value {
     flex-wrap: wrap;
 }
 
+/* Enhanced Stats Badges (Glassy Gradient) */
 .stats-badge-premium {
-    background: var(--gradient-red);
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.9) 0%, rgba(192, 57, 43, 0.9) 100%) !important;
+    backdrop-filter: blur(10px);
     color: white;
-    padding: 12px 24px;
-    border-radius: 16px;
+    padding: 16px 24px;
+    /* Increased padding */
+    border-radius: 20px;
+    /* Softer pill */
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 8px 20px rgba(231, 76, 60, 0.2);
-    min-width: 120px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+    /* Glass border */
+    min-width: 130px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-badge-premium:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(231, 76, 60, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
 }
 
 .stats-badge-premium .count {
-    font-size: 1.6rem;
+    font-size: 2rem;
+    /* Larger number */
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .stats-badge-premium .label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 700;
-    opacity: 0.85;
-    letter-spacing: 1px;
-    margin-top: 4px;
+    opacity: 0.9;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+}
+
+/* Search Box Container */
+.search-box-lux {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0;
 }
 
 /* Links */
@@ -628,6 +654,22 @@ mat-card-subtitle {
 /* Tab Contrast Fixes (Force legibility on dark theme) */
 .mat-mdc-tab-labels {
     background-color: transparent;
+    gap: 12px;
+}
+
+/* Glass Pills Tab Navigation */
+.mat-mdc-tab-header {
+    background: transparent !important;
+    /* Transparent container for button look */
+    border-radius: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    display: flex !important;
+    /* Full width flex */
+    width: 100% !important;
+    margin-bottom: 25px;
+    max-width: 100%;
+    overflow: visible !important;
 }
 
 /* Base tab link/label */
@@ -635,19 +677,54 @@ mat-card-subtitle {
 .mat-mdc-tab-label,
 .mdc-tab,
 .mdc-tab__text-label {
-    color: rgba(255, 255, 255, 0.7) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    padding: 0 12px !important;
+    height: 48px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    letter-spacing: 0.5px;
+    flex-grow: 1 !important;
+    /* Expand to fill width */
+    flex-basis: 0 !important;
+    /* Equal width distribution */
+    max-width: unset !important;
+    margin: 0 4px !important;
+    /* Gap between buttons */
+}
+
+/* Hover state */
+.mdc-tab:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Active tab state */
+.mdc-tab.mdc-tab--active,
 .mat-mdc-tab-label.mdc-tab--active,
-.mat-mdc-tab-link.mdc-tab--active,
-.mdc-tab--active .mdc-tab__text-label {
-    color: var(--text-white) !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border-bottom: 2px solid var(--accent-red) !important;
-    /* Brand highlight */
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+.mat-mdc-tab-link.mdc-tab--active {
+    color: #fff !important;
+    background: var(--gradient-red, linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4) !important;
+    opacity: 1 !important;
+}
+
+.mdc-tab.mdc-tab--active:hover {
+    background: var(--gradient-red, linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)) !important;
+}
+
+/* Hide default Material Tab Indicator (Ink Bar) */
+.mat-mdc-tab-group .mdc-tab-indicator,
+.mat-ink-bar {
+    display: none !important;
+    height: 0 !important;
+    visibility: hidden;
 }
 
 .mat-mdc-tab-header-pagination-chevron {
@@ -776,4 +853,410 @@ mat-card-subtitle {
     --mdc-snackbar-container-color: #e67e22;
     --mdc-snackbar-supporting-text-color: #ffffff;
     --mat-mdc-snack-bar-button-color: #ffffff;
+}
+
+/* === UNIFIED MASTER STYLES (ADDED BY ANTIGRAVITY) === */
+
+/* 1. Master Title - Matches Admin Dashboard "Lux" */
+.section-title-lux {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -1.5px !important;
+    background: var(--gradient-red) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    margin-bottom: 0 !important;
+    line-height: 1.2;
+    text-shadow: none !important;
+}
+
+/* 2. Master Modal Overlay */
+.modal-overlay-lux {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    z-index: 9999 !important;
+    /* High priority */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* 3. Master Modal Card (Glassmorphism) */
+/* 3. Master Modal Card (Glassmorphism) */
+.modal-card-lux {
+    background: rgba(30, 30, 35, 0.98) !important;
+    /* Increased opacity from 0.95 */
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9) !important;
+
+    /* OPTIMIZED SIZE - ABSOLUTE LAYOUT (NO SCROLL) */
+    padding: 1rem 1.5rem 1.5rem 1.5rem !important;
+    /* Balanced Top Padding */
+    position: relative;
+    overflow-y: visible !important;
+    /* NO SCROLLBARS */
+    overflow-x: hidden !important;
+
+    height: auto !important;
+    /* Absolute height based on content */
+    max-height: none !important;
+    /* Remove constraints */
+    width: auto;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-card-lux.medium {
+    width: 700px !important;
+    /* "Mas chicos" - Reduced from 800px */
+    max-width: 95vw;
+}
+
+.modal-card-lux.large {
+    width: 900px !important;
+    max-width: 98vw;
+}
+
+.modal-card-lux.compact {
+    width: 400px !important;
+    /* "Mas chicos" - Reduced from 500px */
+    max-width: 95vw;
+}
+
+/* 4. Master Primary Button (Gold/Reception Style) */
+.btn-lux-primary {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8a2e 100%) !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    border-radius: 50px !important;
+    padding: 0 32px !important;
+    height: 48px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    white-space: nowrap;
+}
+
+.btn-lux-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5) !important;
+    background: linear-gradient(135deg, #e5c14b 0%, #bfa040 100%) !important;
+}
+
+/* 5. Master Input/Select Frame ("Pill Style") */
+.input-group-lux {
+    width: 100%;
+}
+
+.input-group-lux .mat-mdc-form-field-flex {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 0 20px !important;
+    height: 48px !important;
+    align-items: center !important;
+}
+
+.input-group-lux .mat-mdc-form-field-underline,
+.input-group-lux .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+}
+
+/* 6. MatDialog Overrides for Lux Panel */
+.lux-dialog-panel .mat-mdc-dialog-container {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+.lux-dialog-panel .mat-mdc-dialog-surface {
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+/* 7. Enhanced Text Field Labels (Beautiful & Professional) */
+.premium-search .mat-mdc-form-field-wrapper,
+.premium-search .mat-mdc-text-field-wrapper {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Label Styling */
+.premium-search .mdc-floating-label {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    color: var(--text-gray) !important;
+    transition: all 0.2s ease-out !important;
+}
+
+/* Focused State */
+.premium-search.mat-focused .mdc-floating-label {
+    color: var(--accent-orange) !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-shadow: 0 0 10px rgba(230, 126, 34, 0.4);
+}
+
+.premium-search.mat-focused .mat-mdc-text-field-wrapper {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--accent-orange) !important;
+    box-shadow: 0 0 15px rgba(230, 126, 34, 0.2) !important;
+}
+
+/* Input Text */
+.premium-search input.mat-mdc-input-element,
+.premium-search .mat-mdc-select-value-text {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 500 !important;
+    color: var(--text-white) !important;
+    font-size: 1rem !important;
+}
+
+/* Global Close Button (Sexy) */
+.close-btn-sexy {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-gray);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.close-btn-sexy:hover {
+    background: rgba(231, 76, 60, 0.2);
+    color: var(--text-white);
+    transform: rotate(90deg);
+    border-color: var(--accent-red);
+}
+
+/* Custom Color Picker Reset */
+.color-picker-lux {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 30px !important;
+    height: 30px !important;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0 !important;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+}
+
+.color-picker-lux::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-picker-lux::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+}
+
+/* 8. Premium Search Compact (Ultra Reduced Height) */
+.premium-search-compact .mat-mdc-text-field-wrapper {
+    min-height: 28px !important;
+    /* "Más cortos" - Ultra Compact */
+    padding: 0 8px !important;
+    border-radius: 6px !important;
+    font-size: 0.75rem !important;
+}
+
+/* Adjust label position for 28px height */
+.premium-search-compact .mdc-floating-label {
+    top: 14px !important;
+    font-size: 0.75rem !important;
+}
+
+/* Adjust label when floating */
+.premium-search-compact .mdc-floating-label--float-above {
+    transform: translateY(-24px) scale(0.75) !important;
+}
+
+/* Adjust input/textarea text position and color */
+.premium-search-compact input.mat-mdc-input-element,
+.premium-search-compact textarea.mat-mdc-input-element,
+.premium-search-compact .mat-mdc-select-value {
+    margin-top: -4px !important;
+    /* Pull text up for 28px height */
+    color: white !important;
+    caret-color: white !important;
+    color-scheme: dark !important;
+    /* Forces calendar/clock icons to be white */
+}
+
+.premium-search-compact .mat-mdc-select-arrow-wrapper {
+    transform: translateY(-25%);
+}
+
+/* Filled State - Neon Green Outline (When not focused but has value) */
+/* TARGETING MDC WRAPPER FLOATING STATE - ROBUST */
+.premium-search-compact:not(.mat-focused) .mdc-text-field--label-floating .mdc-notched-outline__leading,
+.premium-search-compact:not(.mat-focused) .mdc-text-field--label-floating .mdc-notched-outline__notch,
+.premium-search-compact:not(.mat-focused) .mdc-text-field--label-floating .mdc-notched-outline__trailing,
+.premium-search-compact.mat-form-field-should-float:not(.mat-focused) .mdc-notched-outline__leading,
+.premium-search-compact.mat-form-field-should-float:not(.mat-focused) .mdc-notched-outline__notch,
+.premium-search-compact.mat-form-field-should-float:not(.mat-focused) .mdc-notched-outline__trailing {
+    border-color: #39ff14 !important;
+    /* Neon Green */
+    border-width: 1px !important;
+}
+
+/* Ensure Label creates contrast or stays white/green */
+.premium-search-compact:not(.mat-focused) .mdc-text-field--label-floating .mdc-floating-label,
+.premium-search-compact.mat-form-field-should-float:not(.mat-focused) .mdc-floating-label {
+    color: #39ff14 !important;
+}
+
+.color-picker-lux:hover {
+    transform: scale(1.1);
+}
+
+/* Header for Lux Modals */
+.modal-header-lux {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    /* Matches card layout */
+}
+
+.modal-header-lux h3,
+.modal-header-lux .mat-card-title {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* MODAL LUX OVERFLOW FIX (GLOBAL) */
+.modal-overlay-lux {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-card-lux {
+    background: rgba(30, 30, 30, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 24px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 90vh !important;
+    width: 90vw;
+    max-width: 600px;
+    overflow: hidden !important;
+}
+
+.modal-card-lux.medium {
+    max-width: 800px;
+}
+
+.modal-card-lux.compact {
+    max-width: 500px;
+}
+
+/* Header stays fixed at top */
+.modal-card-lux .modal-header-lux,
+.modal-card-lux mat-card-header {
+    flex-shrink: 0 !important;
+    padding: 24px 24px 0 24px !important;
+}
+
+/* Content scrolls if too tall */
+.modal-card-lux mat-card-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    padding: 0 24px !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    display: block !important;
+    /* Ensure it behaves as a block for scrolling */
+}
+
+/* Actions stay fixed at bottom */
+.modal-card-lux mat-card-actions {
+    flex-shrink: 0 !important;
+    padding: 16px 24px !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: rgba(30, 30, 30, 0.95);
+    border-radius: 0 0 24px 24px;
+}
+
+/* Scrollbar Webkit */
+.modal-card-lux mat-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-card-lux mat-card-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* 9. User Avatar Lux (Circular Header Icon) */
+.user-avatar-lux {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    width: 48px !important;
+    height: 48px !important;
+    overflow: hidden;
+}
+
+.user-avatar-lux mat-icon,
+.user-avatar-lux i {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

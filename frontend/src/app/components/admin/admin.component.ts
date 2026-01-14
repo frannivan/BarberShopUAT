@@ -137,6 +137,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     todayAppointmentsCount: number = 0;
     activeBarbersCount: number = 0;
 
+    get activeBarbers() {
+        return this.barbers ? this.barbers.filter(b => b.active) : [];
+    }
+
     loadStats(): void {
         this.adminService.getStats().subscribe({
             next: data => {
@@ -355,7 +359,15 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     navigateToBooking() {
-        this.router.navigate(['/booking'], { queryParams: { action: 'new' } });
+        this.router.navigate(['/booking']);
+    }
+
+    navigateToPos() {
+        this.router.navigate(['/admin/pos']);
+    }
+
+    navigateToCash() {
+        this.router.navigate(['/admin/cash']);
     }
 
     cancelAppointment(id: number): void {
@@ -532,6 +544,32 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
+    onFileSelected(event: any) {
+        const file: File = event.target.files[0];
+        if (file) {
+            // 1. Instant Preview
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+                this.newUser.photoUrl = e.target.result; // Show local base64 immediately
+                this.cdr.detectChanges();
+            };
+            reader.readAsDataURL(file);
+
+            // 2. Background Upload
+            this.showSnackBar('Subiendo imagen en segundo plano...', 'warning');
+            this.adminService.uploadPhoto(file).subscribe({
+                next: (res: any) => {
+                    this.newUser.photoUrl = res.url; // Replace with Server URL
+                    this.showSnackBar('Imagen guardada correctamente.');
+                },
+                error: (err) => {
+                    console.error('Upload Error', err);
+                    this.showSnackBar('Error subiendo imagen.', 'error');
+                }
+            });
+        }
+    }
+
     isBarberActive(user: any): boolean {
         const barber = this.barbers.find(b => b.user?.id === user.id);
         return barber ? barber.active : true;
@@ -561,6 +599,8 @@ export class AdminComponent implements OnInit, OnDestroy {
                 email: u.email,
                 phone: u.phone,
                 gender: u.gender,
+                age: u.age,
+                observations: u.observations,
                 appointments: [] as any[]
             }));
 
@@ -596,6 +636,8 @@ export class AdminComponent implements OnInit, OnDestroy {
             const dialogRef = this.dialog.open(ClientDossierModalComponent, {
                 width: '900px',
                 maxWidth: '95vw',
+                panelClass: 'lux-dialog-panel',
+                backdropClass: 'lux-dialog-backdrop',
                 data: {
                     client: client,
                     appointments: client.appointments
@@ -606,6 +648,10 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
 
             dialogRef.afterClosed().subscribe(result => {
+                // Refresh data to ensure next open is fresh
+                this.loadUsers();
+                this.loadAppointments();
+
                 if (result?.action === 'edit') {
                     this.startEditUser(result.client);
                 }

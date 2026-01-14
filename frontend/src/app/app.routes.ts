@@ -22,6 +22,9 @@ export const routes: Routes = [
     { path: 'user-management', component: UserManagementComponent, canActivate: [adminGuard] },
     { path: 'admin/crm/leads', component: AdminCrmLeadsComponent, canActivate: [adminGuard] },
     { path: 'admin/crm/opportunities', component: AdminCrmOpportunitiesComponent, canActivate: [adminGuard] },
+    { path: 'admin/pos', loadComponent: () => import('./components/admin/pos/pos.component').then(m => m.PointOfSaleComponent), canActivate: [adminGuard] },
+    { path: 'admin/articles', loadComponent: () => import('./components/admin/articles/articles.component').then(m => m.ArticlesComponent), canActivate: [adminGuard] },
+    { path: 'admin/cash', loadComponent: () => import('./components/admin/cash-register/cash-register.component').then(m => m.CashRegisterComponent), canActivate: [adminGuard] },
     { path: 'book/:barberId', component: SimpleBookingComponent },
     { path: 'home', component: HomeComponent },
     { path: '', redirectTo: '/home', pathMatch: 'full' }

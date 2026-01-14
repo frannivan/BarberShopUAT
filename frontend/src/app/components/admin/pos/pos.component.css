@@ -1,0 +1,467 @@
+/* POS CONTAINER LAYOUT (3-COLUMN GRID) */
+.pos-container {
+    display: grid;
+    grid-template-columns: 20% 50% 30%;
+    /* 200px 1fr 350px equivalent */
+    gap: 1.5rem;
+    height: calc(100vh - 120px);
+    /* Fill screen minus header */
+    padding: 1rem;
+    overflow: hidden;
+}
+
+/* 1. SIDEBAR (CATEGORIES) */
+.pos-sidebar-left {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem;
+    position: relative;
+    border-radius: 16px;
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 1rem;
+    overflow-y: auto;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid transparent;
+}
+
+.category-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.category-item.active {
+    background: rgba(0, 243, 255, 0.15);
+    color: #00f3ff;
+    font-weight: bold;
+    border: 1px solid rgba(0, 243, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.1);
+    text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.category-icon {
+    width: 24px;
+    margin-right: 12px;
+    text-align: center;
+}
+
+/* 2. MAIN GRID */
+.pos-main-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.items-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+    padding-right: 5px;
+}
+
+/* Scrollbar styling for grid */
+.items-grid-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.items-grid-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+/* GRID ITEM CARD */
+.pos-card {
+    background: rgba(45, 55, 72, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 180px;
+    /* Increased from 160px */
+}
+
+.pos-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(214, 158, 46, 0.5);
+}
+
+.pos-card:active {
+    transform: scale(0.98);
+}
+
+.card-image-wrapper {
+    height: 90px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-image-wrapper img {
+    max-height: 60px;
+    opacity: 0.9;
+}
+
+.large-card-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.3s ease;
+}
+
+.pos-card:hover .large-card-icon {
+    color: #d69e2e;
+    /* Gold on hover */
+}
+
+.card-info {
+    padding: 10px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.item-name {
+    color: #fff;
+    font-size: 0.85rem;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.2;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.item-price {
+    color: #d69e2e;
+    font-weight: bold;
+    margin: 4px 0 0 0;
+    font-size: 0.95rem;
+    /* Slightly smaller to fit label */
+    flex-shrink: 0;
+}
+
+/* COMPACT SELECT FOR TICKET */
+.compact-select-dark .mat-mdc-form-field-wrapper {
+    padding-bottom: 0 !important;
+}
+
+.compact-select-dark .mat-mdc-form-field-infix {
+    padding: 0.4em 0 0.8em 0 !important;
+    border-top: 0 !important;
+}
+
+.compact-select-dark .mat-mdc-form-field-flex {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px !important;
+}
+
+.compact-select-dark .mdc-text-field--outlined .mdc-notched-outline {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.compact-select-dark .mat-mdc-select-value {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.85rem !important;
+}
+
+.compact-select-dark .mat-mdc-select-arrow {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Override global mat-form-field height for this specific context if needed */
+.compact-select-dark {
+    font-size: 12px;
+}
+
+/* 3. TICKET PANEL (Fixed Layout) */
+.pos-ticket-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(45, 55, 72, 0.95) !important;
+    overflow: hidden;
+    /* Ensure children don't push boundaries */
+}
+
+.ticket-header {
+    flex-shrink: 0;
+    /* Keep header visible */
+}
+
+.ticket-items-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+    margin: 0.5rem 0;
+    padding-right: 5px;
+    min-height: 0;
+}
+
+/* COMPACT ITEM STYLES */
+.ticket-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 6px 8px;
+    /* Slightly more padding */
+    margin-bottom: 6px;
+    border-left: 3px solid #48bb78;
+    min-height: 50px;
+    /* Allow growth, relaxed fixed height */
+    height: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* ULTRA COMPACT SELECT OVERRIDES */
+.compact-select-dark .mat-mdc-form-field-wrapper {
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+}
+
+.compact-select-dark .mat-mdc-form-field-infix {
+    padding: 2px 0 !important;
+    /* Slight padding for vertical centering */
+    border-top: 0 !important;
+    min-height: 28px !important;
+    width: auto !important;
+}
+
+::ng-deep .compact-select-dark .mat-mdc-form-field-flex {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 50px !important;
+    /* Pill shape */
+    padding: 0 10px !important;
+    align-items: center !important;
+    height: 28px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::ng-deep .compact-select-dark:hover .mat-mdc-form-field-flex {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Force removal of MDC outlines */
+::ng-deep .compact-select-dark .mdc-notched-outline {
+    display: none !important;
+}
+
+::ng-deep .compact-select-dark .mat-mdc-text-field-wrapper {
+    padding: 0 !important;
+}
+
+/* Hide default Material outlines */
+.compact-select-dark .mdc-notched-outline__leading,
+.compact-select-dark .mdc-notched-outline__notch,
+.compact-select-dark .mdc-notched-outline__trailing {
+    border: none !important;
+}
+
+.compact-select-dark .mat-mdc-select-value {
+    font-size: 0.75rem !important;
+    /* Slightly larger text */
+    color: rgba(255, 255, 255, 0.9) !important;
+    line-height: normal !important;
+}
+
+.compact-select-dark .mat-mdc-select-arrow {
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 4px solid transparent !important;
+    border-right: 4px solid transparent !important;
+    border-top: 4px solid rgba(255, 255, 255, 0.6) !important;
+    margin: 0 0 0 6px !important;
+}
+
+.compact-select-dark {
+    font-size: 11px;
+    line-height: normal;
+    display: block;
+}
+
+/* Scroll area max-height safeguard */
+.ticket-items-scroll {
+    max-height: calc(100vh - 350px);
+    /* Fallback */
+}
+
+.btn-icon-sm {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.btn-icon-sm:hover {
+    background: rgba(255, 0, 0, 0.1);
+}
+
+.btn-checkout-lux {
+    background: var(--gradient-success, linear-gradient(135deg, #48bb78 0%, #2f855a 100%));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    /* Pill shape */
+    padding: 15px 30px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Bouncy */
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-checkout-lux:hover:not([disabled]) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.6);
+}
+
+.btn-checkout-lux:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #4a5568;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ANIMATIONS */
+.animate-pop {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .pos-container {
+        grid-template-columns: 80px 1fr 280px;
+        /* Collapsed sidebar */
+    }
+
+    .category-name {
+        display: none;
+    }
+
+    .category-item {
+        justify-content: center;
+    }
+
+    .category-icon {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+}
+
+/* CHECKOUT MODAL STYLES */
+.checkout-content {
+    margin-top: 1rem;
+}
+
+.total-display h1 {
+    text-shadow: 0 2px 10px rgba(214, 158, 46, 0.3);
+}
+
+.payment-methods-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.pm-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.pm-option mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+}
+
+.pm-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.pm-option.active {
+    background: var(--gradient-gold);
+    color: #1a202c;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(214, 158, 46, 0.4);
+    font-weight: bold;
+}
+
+.pm-option.active mat-icon {
+    color: #1a202c;
+}
+
+.cash-calc {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

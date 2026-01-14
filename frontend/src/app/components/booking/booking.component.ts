@@ -125,13 +125,24 @@ export class BookingComponent implements OnInit, OnDestroy {
         slotMinTime: '09:00:00',
         slotMaxTime: '18:00:00',
         allDaySlot: false,
-        selectConstraint: 'businessHours',
+        // Removed selectConstraint to allow clicking anywhere (especially in Month view)
         select: (arg) => {
             console.log('select triggered:', arg);
             this.ngZone.run(() => {
                 this.handleDateClick(arg);
             });
         },
+        // Custom Toolbar to hide default title (we will show it externally with clock)
+        headerToolbar: {
+            left: 'prev,next today',
+            center: '',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        datesSet: (arg) => {
+            this.ngZone.run(() => {
+                this.viewTitle = arg.view.title;
+            });
+        }
     };
 
     barbers: any[] = [];
@@ -207,6 +218,12 @@ export class BookingComponent implements OnInit, OnDestroy {
         role: 'CLIENTE'
     };
 
+    // Live Clock & Title
+    currentTime: string = '';
+    viewTitle: string = ''; // Capture Calendar Title
+    private clockInterval: any;
+
+
     constructor(
         private appointmentService: AppointmentService,
         private storageService: StorageService,
@@ -230,13 +247,32 @@ export class BookingComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.fullReload();
+        this.startClock();
     }
 
     ngOnDestroy(): void {
         if (this.routerSubscription) {
             this.routerSubscription.unsubscribe();
         }
+        if (this.clockInterval) {
+            clearInterval(this.clockInterval);
+        }
     }
+
+    private startClock() {
+        this.updateTime();
+        this.clockInterval = setInterval(() => {
+            this.updateTime();
+        }, 1000);
+    }
+
+    private updateTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        this.currentTime = `${hours}:${minutes}`;
+    }
+
 
     private fullReload(): void {
         this.isLoggedIn = this.storageService.isLoggedIn();
@@ -278,7 +314,11 @@ export class BookingComponent implements OnInit, OnDestroy {
     }
 
     loadAppointmentsForList(): void {
-        this.appointmentService.getAppointments().subscribe({
+        const obs$ = (this.selectedBarberId && this.selectedBarberId !== 0)
+            ? this.appointmentService.getBarberAppointments(this.selectedBarberId)
+            : this.appointmentService.getAppointments();
+
+        obs$.subscribe({
             next: (data) => {
                 let filteredData = data;
                 const user = this.storageService.getUser();
@@ -298,7 +338,10 @@ export class BookingComponent implements OnInit, OnDestroy {
                     // Admin sees all (no filter)
                 }
 
-                this.dataSource.data = filteredData.map((apt: any) => ({
+                // Sort by date ascending (Nearest first)
+                this.dataSource.data = filteredData.sort((a: any, b: any) => {
+                    return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+                }).map((apt: any) => ({
                     ...apt,
                     clientName: apt.clientName || apt.user?.name || apt.guestName || 'Unknown',
                     displayTime: new Date(apt.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -423,8 +466,10 @@ export class BookingComponent implements OnInit, OnDestroy {
     closeQuickClientModal() {
         this.showQuickClientModal = false;
         // RESTORE BOOKING MODAL
-        this.showBookingModal = true;
-        this.cdr.detectChanges();
+        setTimeout(() => {
+            this.showBookingModal = true;
+            this.cdr.detectChanges();
+        }, 0);
     }
 
     saveQuickClient(): void {
@@ -475,12 +520,21 @@ export class BookingComponent implements OnInit, OnDestroy {
     }
 
     onBarberChange(): void {
+        this.loadAppointmentsForList(); // Update list view
+
         if (this.selectedBarberId === 0) {
             // "All" option selected
             this.loadAllAppointments();
         } else if (this.selectedBarberId) {
             this.loadBarberAppointments(this.selectedBarberId);
         }
+    }
+
+    onViewChange(): void {
+        // Trigger window resize to force FullCalendar to readjust its size
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 100);
     }
 
     loadAllAppointments(): void {
@@ -567,21 +621,10 @@ export class BookingComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.selectedAppointment = {
-            id: clickInfo.event.extendedProps?.['appointmentId'],
-            title: clickInfo.event.title,
-            start: clickInfo.event.start,
-            end: clickInfo.event.end,
-            barber: clickInfo.event.extendedProps?.['barber'],
-            clientName: clickInfo.event.extendedProps?.['clientName'],
-            clientEmail: clickInfo.event.extendedProps?.['clientEmail'],
-            clientPhone: clickInfo.event.extendedProps?.['clientPhone'],
-            status: clickInfo.event.extendedProps?.['status'],
-            color: clickInfo.event.backgroundColor,
-            extendedProps: clickInfo.event.extendedProps
-        };
-        this.showAppointmentDetail = true;
-        this.cdr.detectChanges();
+        const appointmentId = clickInfo.event.extendedProps?.['appointmentId'];
+        if (appointmentId) {
+            this.loadAppointmentForEdit(Number(appointmentId));
+        }
     }
 
     handleEventDrop(arg: EventDropArg): void {
@@ -730,15 +773,26 @@ export class BookingComponent implements OnInit, OnDestroy {
     // ... (omitted)
 
     handleDateClick(arg: any) {
-        // Force reset
-        this.showBookingModal = false;
-        this.cdr.detectChanges();
+        // Force reset deferred to avoid NG0100
+        setTimeout(() => {
+            this.showBookingModal = false;
+            this.cdr.detectChanges();
+        }, 0);
 
         console.log('handleDateClick called:', arg);
         const dateStr = arg.dateStr || arg.startStr;
         if (!dateStr) return;
 
-        this.bookingDate = new Date(dateStr);
+        // Fix for Month View (YYYY-MM-DD) being parsed as UTC -> Previous Day
+        if (dateStr.length === 10) {
+            // It's a plain date (YYYY-MM-DD), parse as LOCAL
+            const [year, month, day] = dateStr.split('-').map((num: string) => parseInt(num, 10));
+            this.bookingDate = new Date(year, month - 1, day);
+        } else {
+            // It has time (TimeGrid), parse normally
+            this.bookingDate = new Date(dateStr);
+        }
+
         const hours = this.bookingDate.getHours().toString().padStart(2, '0');
         const minutes = this.bookingDate.getMinutes().toString().padStart(2, '0');
         this.bookingTime = `${hours}:${minutes}`;
@@ -771,7 +825,10 @@ export class BookingComponent implements OnInit, OnDestroy {
         this.clientControl = new FormControl();
         this.filteredClients = this.clientControl.valueChanges.pipe(
             startWith(''),
-            map(value => this._filterClients(value))
+            map(value => {
+                const name = typeof value === 'string' ? value : value?.name;
+                return name ? this._filterClients(name as string) : this.clients.slice();
+            })
         );
 
         if (this.showQuickClientModal) {
@@ -903,7 +960,7 @@ export class BookingComponent implements OnInit, OnDestroy {
                 next: () => {
                     this.snackBar.open('Appointment updated successfully!', 'Close', { duration: 3000 });
                     this.cancelEdit();
-                    this.closeBookingModal(); // Corrected from closeappointmentDetail()
+                    this.closeAppointmentDetail(); // Corrected to close the right modal
                     this.refreshAppointments();
                     this.isSaving = false;
                 },
@@ -1019,9 +1076,12 @@ export class BookingComponent implements OnInit, OnDestroy {
         request$.subscribe({
             next: (res) => {
                 this.snackBar.open('Cita agendada con éxito!', 'OK', { duration: 3000 });
-                this.closeBookingModal();
-                this.refreshAppointments();
-                this.isSaving = false;
+                // Robust async close to strictly avoid NG0100
+                setTimeout(() => {
+                    this.closeBookingModal();
+                    this.refreshAppointments();
+                    this.isSaving = false;
+                }, 150);
             },
             error: (err) => {
                 console.error(err);
@@ -1053,11 +1113,11 @@ export class BookingComponent implements OnInit, OnDestroy {
 
                 console.log('Loaded appointment for edit:', appointment);
 
-                // Set the barber and load their appointments
-                this.selectedBarberId = appointment.barber.id;
-                if (this.selectedBarberId) {
-                    this.loadBarberAppointments(this.selectedBarberId);
-                }
+                // Removed automatic filtering by barber to preserve user's list view context
+                // this.selectedBarberId = appointment.barber.id;
+                // if (this.selectedBarberId) {
+                //     this.loadBarberAppointments(this.selectedBarberId);
+                // }
 
                 // Wait a bit for the calendar to load, then open the appointment
                 setTimeout(() => {
@@ -1077,14 +1137,58 @@ export class BookingComponent implements OnInit, OnDestroy {
                             appointmentType: appointment.appointmentType
                         }
                     };
+
+                    // Populate Edit Form Fields Immediately
+                    this.isEditMode = true;
+                    this.editBarberId = this.selectedAppointment.barber?.id || null;
+                    this.editDate = new Date(this.selectedAppointment.start);
+
+                    const hours = this.editDate.getHours().toString().padStart(2, '0');
+                    const minutes = this.editDate.getMinutes().toString().padStart(2, '0');
+                    this.editTime = `${hours}:${minutes}`;
+
+                    if (this.selectedAppointment.end) {
+                        const endDt = new Date(this.selectedAppointment.end);
+                        const endH = endDt.getHours().toString().padStart(2, '0');
+                        const endM = endDt.getMinutes().toString().padStart(2, '0');
+                        this.editEndTime = `${endH}:${endM}`;
+                    }
+
+                    this.editStatus = this.selectedAppointment.status || 'CONFIRMED';
+                    this.editNotes = this.selectedAppointment.extendedProps?.notes || '';
+                    this.editTypeId = this.selectedAppointment.extendedProps?.appointmentType?.id || null;
+
                     this.showAppointmentDetail = true;
-                    this.isEditMode = false; // Ensure we start in View mode
                     this.cdr.detectChanges();
-                }, 500);
+                }, 100);
             },
             error: (err: any) => {
                 console.error('Error loading appointments:', err);
                 this.snackBar.open('Failed to load appointment for editing. Please make sure you are logged in as admin.', 'Close', { duration: 3000 });
+            }
+        });
+    }
+
+    cancelAppointmentStatus(): void {
+        if (!this.selectedAppointment) return;
+
+        if (!confirm('¿Estás seguro de que deseas cancelar esta cita? El estatus cambiará a CANCELADA pero no se eliminará.')) {
+            return;
+        }
+
+        const updateData: any = {
+            status: 'CANCELLED'
+        };
+
+        this.appointmentService.updateAppointment(this.selectedAppointment.id, updateData).subscribe({
+            next: () => {
+                this.snackBar.open('Cita cancelada correctamente.', 'Cerrar', { duration: 3000 });
+                this.closeAppointmentDetail();
+                this.refreshAppointments();
+            },
+            error: (err) => {
+                console.error('Error cancelling appointment:', err);
+                this.snackBar.open('Error al cancelar la cita.', 'Cerrar', { duration: 3000 });
             }
         });
     }

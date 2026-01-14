@@ -41,5 +41,11 @@ export class AdminService {
     toggleBarberStatus(id: number): Observable<any> {
         return this.http.put(`${environment.apiUrl}/barbers/${id}/status`, {}, { headers: this.getHeaders() });
     }
+
+    uploadPhoto(file: File): Observable<any> {
+        const formData: FormData = new FormData();
+        formData.append('file', file);
+        return this.http.post(`${environment.apiUrl}/uploads`, formData, { headers: this.getHeaders() });
+    }
 }
 

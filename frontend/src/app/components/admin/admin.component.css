@@ -677,6 +677,225 @@ mat-list-item:last-child {
     box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
 }
 
+/* ... existing styles ... */
+
 .close-btn-sexy:active {
     transform: rotate(90deg) scale(0.95);
+}
+
+/* --- MOBILE RESPONSIVENESS FIXES --- */
+@media (max-width: 768px) {
+
+    /* 1. TABS: Better Mobile Scrolling (No arrows) */
+    ::ng-deep .mat-mdc-tab-header-pagination {
+        display: none !important;
+    }
+
+    ::ng-deep .mat-mdc-tab-header {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    ::ng-deep .mat-mdc-tab-labels {
+        flex-wrap: nowrap !important;
+        /* Keep in one line */
+    }
+
+    ::ng-deep .mat-mdc-tab-link-container,
+    ::ng-deep .mat-mdc-tab-list {
+        transform: none !important;
+        /* Prevent transformation issues */
+    }
+
+    /* 2. TABLE: Horizontal Scroll instead of Squash */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+
+    .premium-crm-table {
+        min-width: 100%;
+        /* Allow to fit screen if content allows */
+        width: 100%;
+        table-layout: auto;
+        /* Let content dictate width on mobile */
+    }
+
+    /* Adjust padding for mobile cells */
+    .premium-crm-table thead th,
+    .premium-row td {
+        padding: 1rem 0.6rem;
+        /* Slightly tighter padding */
+    }
+
+    /* HIDE Less Important Columns on Mobile to fit Actions */
+    .col-email,
+    .col-phone,
+    /* Target the 2nd and 3rd columns in body for Personal Table */
+    .premium-crm-table tbody tr td:nth-child(2),
+    .premium-crm-table tbody tr td:nth-child(3) {
+        display: none !important;
+    }
+
+    /* Rebalance Visible Columns for Mobile */
+    .col-user {
+        width: 35% !important;
+    }
+
+    .col-role {
+        width: 15% !important;
+    }
+
+    .col-status {
+        width: 15% !important;
+    }
+
+    .col-actions-sm,
+    .col-actions {
+        width: 35% !important;
+        /* Give plenty of space for buttons */
+        text-align: right;
+    }
+
+    /* 3. LAYOUT: Adjust Header and Search */
+    .admin-container {
+        padding: 15px 10px;
+    }
+
+    .admin-container h1 {
+        font-size: 1.8rem;
+    }
+
+    /* Stack Header Inputs nicely */
+    .row.align-items-center>div {
+        margin-bottom: 1rem;
+        text-align: center !important;
+    }
+
+    .row.align-items-center>div:last-child {
+        margin-bottom: 0;
+    }
+
+    .search-box-lux {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .btn-action-lux {
+        /* Remove full width force, likely caused weird stretched buttons */
+        width: auto !important;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        justify-content: center;
+    }
+
+    .btn-action-lux i {
+        margin: 0 !important;
+    }
+
+    /* Stats grid */
+    .stats-container-premium {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .stats-badge-premium {
+        min-width: 0;
+        width: 100%;
+        padding: 12px 8px;
+        min-height: auto;
+    }
+
+    .stats-badge-premium:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
+
+    .stats-badge-premium .count {
+        font-size: 1.4rem;
+    }
+
+    .stats-badge-premium .label {
+        font-size: 0.55rem;
+    }
+}
+
+/* MODAL LUX OVERFLOW FIX 
+   Ensures the modal body scrolls while header/footer stay fixed.
+*/
+.modal-overlay-lux {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-card-lux {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border-radius: 24px;
+    padding: 0;
+    /* Reset padding, explicit sections handle it */
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    /* Critical for keeping buttons on screen */
+    width: 90vw;
+    /* Default width */
+    max-width: 600px;
+}
+
+.modal-card-lux.medium {
+    max-width: 800px;
+}
+
+.modal-card-lux.compact {
+    max-width: 500px;
+}
+
+/* Header stays fixed at top */
+.modal-card-lux .modal-header-lux,
+.modal-card-lux mat-card-header {
+    flex-shrink: 0;
+    padding: 24px 24px 0 24px;
+}
+
+/* Content scrolls if too tall */
+.modal-card-lux mat-card-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 24px;
+    /* Scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Actions stay fixed at bottom */
+.modal-card-lux mat-card-actions {
+    flex-shrink: 0;
+    padding: 16px 24px;
+    margin: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Scrollbar Webkit */
+.modal-card-lux mat-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-card-lux mat-card-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
 }

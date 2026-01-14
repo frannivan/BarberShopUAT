@@ -1,189 +1,772 @@
-.dossier-card {
-    background: var(--secondary-dark);
-    color: var(--text-white);
-}
-
-.dossier-header {
-    background: linear-gradient(to right, rgba(231, 76, 60, 0.1), transparent);
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.truncate-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    max-width: 100%;
-}
-
-.text-gray {
-    color: var(--text-gray);
-}
-
-.stat-box:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    transition: background 0.3s;
-}
-
-/* Scrollbar styling for internal content if needed */
-.dossier-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.dossier-content::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.dossier-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-
-.text-light-gray {
-    color: #cccccc;
-}
-
-
-.gap-4 {
-    gap: 1.5rem;
-}
-
-.premium-input-inline {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 2px 0;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-    outline: none;
-    border-radius: 0;
-}
-
-.premium-input-inline:focus {
-    border-bottom-color: var(--accent-red);
-}
-
-
-.premium-input-inline option {
-    background-color: var(--secondary-dark);
-    color: white;
-}
-
-.status-badge-outline {
-    display: inline-block;
-    padding: 6px 12px;
-    border: 1px solid;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.status-completed {
-    border-color: #2ecc71;
-    color: #2ecc71;
-    background: rgba(46, 204, 113, 0.1);
-}
-
-.status-booked {
-    border-color: #3498db;
-    color: #3498db;
-    background: rgba(52, 152, 219, 0.1);
-}
-
-.status-cancelled {
-    border-color: #e74c3c;
-    color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
-}
-
-/* --- Record Card Styles --- */
-.record-card {
-    width: 600px;
-    background: #1e1e1e;
-    /* Smooth dark grey */
-    border-radius: 6px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
-    position: relative;
-    border: 1px solid #333;
-    font-family: 'Inter', sans-serif;
-    /* Ensure modern font */
-}
-
-.record-header {
-    background: #252525;
-    border-bottom: 1px solid #333;
-    padding: 1.5rem 2rem;
+/* Main Container - The "Card" */
+.clinical-dossier-container {
+    background-color: #f3f4f6;
+    /* Light gray base for the grid background */
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #111827;
+    height: 85vh;
+    /* Fixed height relative to viewport */
+    max-height: 900px;
+    /* Cap for very large screens */
     display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Custom Grid for Dossier Info */
+.clinical-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Ensure full width on very small screens if needed, but keeping 1fr 1fr for now as requested */
+@media (max-width: 576px) {
+    .clinical-info-grid {
+        grid-template-columns: 1fr;
+        /* Stack on mobile only if absolutely necessary */
+        gap: 1rem;
+    }
+}
+
+/* Header */
+.clinical-header {
+    background: #ffffff;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.clinical-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.025em;
+}
+
+/* Body - The "Grid Canvas" */
+.clinical-body {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    overflow: hidden;
+    background: #f3f4f6;
+    flex: 1;
+    min-height: 0;
+    height: auto;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 900px) {
+    .clinical-body {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        /* Scroll vert en mobile */
+    }
+
+    .dossier-left-col,
+    .dossier-right-col {
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        flex: none !important;
+        /* No tratar de llenar espacio, usar auto height */
+    }
+
+    .dossier-right-col {
+        min-height: 500px;
+        /* Espacio para timeline */
+        border-left: none !important;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .dossier-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        /* 2 cols en vez de 4 filas */
+        gap: 12px;
+        text-align: center;
+    }
+
+    /* El avatar ocupa todo el ancho de arriba o comparte */
+    .dossier-stats-grid>div:first-child {
+        grid-column: span 2;
+        margin-bottom: 10px;
+    }
+
+    .clinical-dossier-container {
+        height: 95vh !important;
+        /* Max height en mobile */
+        border-radius: 12px !important;
+        /* Menos radio */
+    }
+}
+
+.dossier-left-col {
+    overflow: hidden;
+    /* Prevent scrolling completely */
+    padding: 24px;
+    height: 100%;
+}
+
+/* Chrome/Safari: Hide scrollbar for left column */
+.dossier-left-col::-webkit-scrollbar {
+    display: none;
+}
+
+.dossier-right-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border-left: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+
+/* ... existing styles ... */
+
+/* History Scroll Container */
+.history-scroll-container {
+    overflow-y: auto;
+    /* Standard behavior */
+    padding-left: 10px;
+    flex-grow: 1;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* ... existing styles ... */
+
+.history-scroll-container::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    /* Darker gray for visibility */
+    border-radius: 3px;
+}
+
+/* MODULAR CARDS (The "Bento" Boxes) */
+.clinical-section-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    /* Fill column height */
+    display: flex;
+    flex-direction: column;
+}
+
+.clinical-card-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #9ca3af;
+    /* Muted section header */
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 8px;
+    display: flex;
     align-items: center;
 }
 
-.record-content {
-    padding: 2rem;
-    background:
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 20px 20px;
-    /* Technical Grid Background */
-    background-color: #1e1e1e;
+.clinical-card-title mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    color: #6b7280;
 }
 
-.record-label {
+
+/* Inputs - Refined for Density */
+.clinical-field-group {
+    margin-bottom: 12px;
+}
+
+.clinical-field-group:last-child {
+    margin-bottom: 0;
+}
+
+.clinical-label {
     font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #888;
-    margin-bottom: 0.25rem;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 4px;
     display: block;
 }
 
-.record-value {
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-.record-value-lg {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-.service-block {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px dashed #444;
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.notes-field {
-    background: #111;
-    border-left: 3px solid var(--accent-red);
-    color: #ccc;
-    font-family: 'Courier New', monospace;
+.clinical-input-box {
+    background: #f9fafb;
+    /* Slightly gray inside white cards */
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    width: 100%;
+    color: #1f2937;
     font-size: 0.9rem;
-    padding: 1rem;
-    border-radius: 0 4px 4px 0;
+    transition: all 0.2s;
 }
 
-.text-accent {
-    color: var(--accent-red, #e74c3c);
+.clinical-input-box:focus {
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 
-.barber-avatar-mini {
-    width: 32px;
-    height: 32px;
-    background: #333;
+.clinical-input-readonly {
+    background: transparent;
+    border: none;
+    padding-left: 0;
+    font-weight: 600;
+    color: #111827;
+    font-size: 1rem;
+    /* Make read-only values pop like data */
+}
+
+
+/* Avatar Panel - Integrated Style */
+.clinical-avatar-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: center;
+}
+
+.clinical-photo-frame {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
+    background-color: #f3f4f6;
+    border: 4px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 12px;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    /* Needed for overlay */
+    cursor: pointer;
+    /* Suggest interaction */
+}
+
+.photo-edit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    /* Dark semi-transparent overlay */
     display: flex;
     align-items: center;
     justify-content: center;
+    color: white;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+.photo-edit-overlay:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.photo-edit-overlay mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+}
+
+/* Badge Styles */
+.badge-soft {
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.badge-soft-green {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #d1fae5;
+}
+
+.badge-soft-blue {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #dbeafe;
+}
+
+.badge-soft-red {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fee2e2;
+}
+
+/* Button overrides for card context */
+.btn-clinical-primary {
+    background: #111827;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 8px 16px;
     font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-clinical-primary:hover {
+    background: #000000;
+    transform: translateY(-1px);
+}
+
+.btn-clinical-outline {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.btn-clinical-outline:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* Utility */
+.text-blue-400 {
+    color: #3b82f6 !important;
+}
+
+.text-gray-400 {
+    color: #9ca3af !important;
+}
+
+/* History Scroll Container */
+.history-scroll-container {
+    overflow-y: auto;
+    padding-left: 10px;
+    flex: 1 1 0;
+    /* Flex-grow 1, Flex-shrink 1, Flex-basis 0 */
+    min-height: 0;
+    width: 100%;
+}
+
+/* Custom Scrollbar for History Only */
+.history-scroll-container::-webkit-scrollbar {
+    width: 8px;
+    /* Slightly wider */
+}
+
+.history-scroll-container::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.history-scroll-container::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    /* Darker gray (Gray-500) for contrast */
+    border-radius: 4px;
+    border: 2px solid #f3f4f6;
+    /* Creates padding effect */
+}
+
+.history-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
+    /* Even darker on hover */
+}
+
+/* --- NEW: Stats Cards (Refactored from Inline) --- */
+.dossier-stats-grid {
+    display: grid;
+    grid-template-columns: 100px 105px 105px 105px;
+    gap: 16px;
+    align-items: center;
+    /* Center vertically since cards are shorter than photo */
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dossier-stat-card {
+    height: 60px;
+    /* Reduced from 100px ("menos largas") */
+    background: white;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    border-radius: 20px;
+    /* Even more rounded */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* Center horizontally */
+    padding: 0 10px;
+    /* Balanced padding */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dossier-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Center content within header line */
+    margin-bottom: 0.25rem;
+    width: 100%;
+}
+
+.stat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+    margin-right: 4px;
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #6b7280;
+    /* text-muted equivalent */
+    text-align: center;
+}
+
+.stat-value {
+    font-weight: 800;
+    color: #1f2937;
+    /* text-dark equivalent */
+    line-height: 1;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.stat-value.large {
+    font-size: 1.5rem;
+    /* h4 equivalent */
+}
+
+.stat-value.medium {
+    font-size: 1.25rem;
+    /* h5 equivalent */
+}
+
+.stat-value.small {
+    font-size: 1rem;
+    /* h6 equivalent */
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* TIMELINE VISUALS (Standardized) */
+.timeline-wrapper {
+    position: relative;
+    min-height: 100%;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    padding-bottom: 0;
+    margin-bottom: 1rem;
+    /* Tighter spacing (was 2rem) */
+}
+
+/* DOT */
+.timeline-dot {
+    position: absolute;
+    left: 19px;
+    /* top handled inline for precision */
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+    background-color: white;
+}
+
+/* Ensure no other pseudo elements interfere if they exist from previous attempts */
+.timeline-wrapper::before {
+    display: none;
+}
+
+/* FUN & PROFESSIONAL MODAL OVERRIDES */
+/* 1. Glassmorphism Overlay */
+::ng-deep .cdk-overlay-dark-backdrop {
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 2. Bento Card Effects */
+.clinical-section-card {
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.clinical-section-card:hover {
+    /* REMOVED transform: translateY(-3px) to prevent jumping */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.04);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* 3. Container Polish */
+.clinical-dossier-container {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* --- PREMIUM DARK TIMELINE THEME --- */
+
+.dossier-right-col.dark-theme {
+    background: linear-gradient(180deg, #1a1a1a7e 0%, #0d0d0d55 100%);
+    border-left: 1px solid rgba(12, 1, 1, 0.157);
+    color: #e0e0e0;
+}
+
+.dossier-right-col.dark-theme .clinical-title {
+    color: #ffffff !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dossier-right-col.dark-theme .border-bottom {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Timeline Components */
+/* Timeline Components */
+.timeline-dark {
+    position: relative;
+    padding: 20px 0 20px 0;
+}
+
+.timeline-dark::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 22px;
+    /* Adjusted centering for thicker line */
+    width: 5px;
+    /* EVEN THICKER LINE (Requested) */
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.25) 15%,
+            rgba(255, 255, 255, 0.25) 85%,
+            rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 3px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 8px;
+    /* ULTRA COMPACT SPACING ("mas pegadas") */
+    cursor: pointer;
+    animation: fadeIn 0.4s ease-out both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Marker - Focused Neon Style */
+.timeline-marker {
+    position: absolute;
+    left: 19px;
+    top: 50%;
+    /* Center vertically */
+    transform: translateY(-50%);
+    /* Center alignment base */
+    margin-top: 5px;
+    /* "Baja 2 milimetros" (approx 5px) */
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--accent-orange, #ff6b00);
+    box-shadow: 0 0 0 4px rgba(26, 26, 26, 1),
+        0 0 10px rgba(255, 107, 0, 0.5);
+    z-index: 2;
+    transition: transform 0.2s ease;
+}
+
+.timeline-item:hover .timeline-marker {
+    transform: translateY(-50%) scale(1.2);
+    /* Maintain center + scale */
+    background: #ff8533;
+    box-shadow: 0 0 0 4px rgba(26, 26, 26, 1),
+        0 0 15px rgba(255, 133, 51, 0.7);
+}
+
+/* Card Content - WHITE Background as requested */
+.timeline-content {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.timeline-content::before {
+    display: none;
+    /* No gradient overlay on white */
+}
+
+.timeline-item:hover .timeline-content {
+    background: #ffffff;
+    transform: translateX(4px);
+    border-color: #d1d5db;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Inner Layout with Dark Text (for White Background) */
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.date-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    /* Gray 500 */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge-small {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+/* Status Colors - Compatible with white bg */
+.status-badge-small.booked {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #d1fae5;
+}
+
+.status-badge-small.completed {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+}
+
+.status-badge-small.cancelled {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fee2e2;
+}
+
+.service-name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #111827;
+    /* Dark Text */
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.time-info {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #4b5563;
+    /* Gray 600 */
+    font-weight: 500;
+    gap: 6px;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+}
+
+.time-info mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: var(--accent-orange, #ff6b00);
+}
+
+.appointment-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.barber-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 12px;
+}
+
+.barber-avatar-small {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     color: #fff;
-    margin-right: 0.75rem;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.barber-name-small {
+    font-size: 0.75rem;
+    color: #4b5563;
+    /* Gray 600 */
+    font-weight: 500;
+}
+
+.empty-state-dark {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    font-style: italic;
+    opacity: 1;
 }

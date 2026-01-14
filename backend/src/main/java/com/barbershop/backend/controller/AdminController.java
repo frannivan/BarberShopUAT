@@ -22,7 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -77,12 +77,13 @@ public class AdminController {
             user.setPassword(encoder.encode(request.getPassword()));
             user.setPhone(request.getPhone());
             user.setGender(request.getGender());
+            user.setAge(request.getAge());
 
             // Determine Role
             User.Role roleVal = User.Role.USER;
             if (request.getRole() != null) {
                 String roleStr = request.getRole().toUpperCase();
-                if (roleStr.equals("CLIENTE")) {
+                if (roleStr.equals("CLIENT") || roleStr.equals("CLIENTE")) {
                     roleVal = User.Role.CLIENTE;
                 } else {
                     roleVal = User.Role.valueOf(roleStr);
@@ -101,7 +102,7 @@ public class AdminController {
                 barberRepository.save(barber);
             }
 
-            return ResponseEntity.ok(new MessageResponse("User created successfully!"));
+            return ResponseEntity.ok(user);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError()
@@ -126,14 +127,23 @@ public class AdminController {
             user.setPhone(request.getPhone());
         if (request.getGender() != null)
             user.setGender(request.getGender());
+        if (request.getAge() != null)
+            user.setAge(request.getAge());
+
+        if (request.getObservations() != null)
+            user.setObservations(request.getObservations());
 
         // Update Role
         User.Role newRole = user.getRole();
         if (request.getRole() != null) {
             try {
-                newRole = User.Role.valueOf(request.getRole().toUpperCase());
+                String r = request.getRole().toUpperCase();
+                if (r.equals("CLIENT"))
+                    r = "CLIENTE";
+                newRole = User.Role.valueOf(r);
                 user.setRole(newRole);
             } catch (Exception e) {
+                System.err.println("Error parsing role: " + request.getRole());
             }
         }
         userRepository.save(user);

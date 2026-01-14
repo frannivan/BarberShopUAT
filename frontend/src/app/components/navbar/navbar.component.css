@@ -78,13 +78,31 @@ nav,
 
     .nav-buttons {
         width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 8px;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 12px;
+        padding: 5px 0;
+        -webkit-overflow-scrolling: touch;
+        /* Scroll snap for better feel */
+        scroll-snap-type: x mandatory;
     }
 
     .nav-buttons button {
-        padding: 0 8px !important;
-        font-size: 0.85rem;
+        padding: 0 16px !important;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        height: 36px;
+    }
+
+    /* Hide scrollbar for clean look */
+    .nav-buttons::-webkit-scrollbar {
+        height: 0;
+        width: 0;
+        background: transparent;
     }
 }

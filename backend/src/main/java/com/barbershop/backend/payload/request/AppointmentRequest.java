@@ -17,4 +17,5 @@ public class AppointmentRequest {
 
     private String notes;
     private Long appointmentTypeId;
+    private String status;
 }

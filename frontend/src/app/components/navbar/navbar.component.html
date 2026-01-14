@@ -14,6 +14,8 @@
         <button mat-button (click)="navigate('/admin')" *ngIf="isAdmin()">Dashboard Admin</button>
         <button mat-button (click)="navigate('/barber-dashboard')" *ngIf="isBarber()">Panel Barber</button>
         <button mat-button (click)="navigate('/admin/crm/leads')" *ngIf="isAdmin()">Prospectos</button>
+        <button mat-button (click)="navigate('/admin/pos')" *ngIf="isAdmin()">Punto de Venta</button>
+        <button mat-button (click)="navigate('/admin/articles')" *ngIf="isAdmin()">Artículos</button>
         <button mat-button (click)="navigate('/login')" *ngIf="!isLoggedIn()">Login Admin</button>
         <button mat-button (click)="logout()" *ngIf="isLoggedIn()">Salir</button>
     </div>

@@ -3,16 +3,18 @@ import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { BarberService } from '../../services/barber.service';
+
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, MatCardModule, MatButtonModule, MatProgressSpinnerModule, RouterModule],
+    imports: [CommonModule, MatCardModule, MatButtonModule, MatProgressSpinnerModule, RouterModule, ChatbotComponent],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })

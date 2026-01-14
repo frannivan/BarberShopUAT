@@ -1,0 +1,98 @@
+<div class="articles-container p-4 fade-in">
+    <div class="header-section mb-4 d-flex align-items-center w-100" style="justify-content: space-between !important;">
+        <div>
+            <h1 class="page-title-lux mb-1">Administración de Artículos</h1>
+            <p class="text-muted-lux">Gestiona tus Servicios, Productos y Promociones</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <button mat-flat-button color="primary" class="btn-lux mr-2" (click)="openCreateModal()">
+                <mat-icon>add</mat-icon>
+                Nuevo {{ getCurrentTabName() }}
+            </button>
+            <button mat-stroked-button color="accent" class="btn-lux" (click)="navigateToPos()">
+                <mat-icon>cash_register</mat-icon>
+                Ir a Caja (POS)
+            </button>
+        </div>
+    </div>
+
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)"
+        class="custom-tab-group">
+
+        <!-- SERVICIOS -->
+        <mat-tab label="Servicios">
+            <div class="items-grid mt-4">
+                <div class="item-card glass-panel" *ngFor="let item of services">
+                    <div class="card-icon service-icon">
+                        <mat-icon>spa</mat-icon>
+                    </div>
+                    <div class="card-content">
+                        <h3>{{ item.name }}</h3>
+                        <p class="price">{{ item.price | currency }}</p>
+                        <p class="meta">{{ item.durationMinutes }} min</p>
+                    </div>
+                    <div class="card-actions">
+                        <button mat-icon-button color="accent"
+                            (click)="editService(item)"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button color="warn"
+                            (click)="deleteService(item)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                </div>
+                <div class="empty-state" *ngIf="services.length === 0">No hay servicios registrados.</div>
+            </div>
+        </mat-tab>
+
+        <!-- PRODUCTOS -->
+        <mat-tab label="Productos">
+            <div class="items-grid mt-4">
+                <div class="item-card glass-panel" *ngFor="let item of products">
+                    <div class="card-icon product-icon">
+                        <mat-icon>invert_colors</mat-icon>
+                    </div>
+                    <div class="card-content">
+                        <h3>{{ item.name }}</h3>
+                        <p class="description">{{ item.description || 'Sin descripción' }}</p>
+                        <p class="price">{{ item.price | currency }}</p>
+                        <p class="meta">Stock: {{ item.stock || 0 }}</p>
+                    </div>
+                    <div class="card-actions">
+                        <button mat-icon-button color="accent"
+                            (click)="editProduct(item)"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button color="warn"
+                            (click)="deleteProduct(item)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                </div>
+                <div class="empty-state" *ngIf="products.length === 0">No hay productos registrados.</div>
+            </div>
+        </mat-tab>
+
+        <!-- PROMOCIONES -->
+        <mat-tab label="Promociones">
+            <div class="items-grid mt-4">
+                <div class="item-card glass-panel promotion-card" *ngFor="let item of promotions">
+                    <div class="card-icon promo-icon">
+                        <mat-icon>local_offer</mat-icon>
+                    </div>
+                    <div class="card-content">
+                        <h3>{{ item.name }}</h3>
+                        <p class="description">{{ item.description }}</p>
+                        <p class="price" *ngIf="item.price"
+                            style="font-weight: bold; color: var(--gold); margin-bottom: 5px;">
+                            Precio: ${{ item.price | number:'1.2-2' }}
+                        </p>
+                        <div class="discount-badge">-{{ item.discountPercentage }}%</div>
+                        <p class="meta" *ngIf="item.validUntil">Válido hasta: {{ item.validUntil | date }}</p>
+                    </div>
+                    <div class="card-actions">
+                        <button mat-icon-button color="accent"
+                            (click)="editPromotion(item)"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button color="warn"
+                            (click)="deletePromotion(item)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                </div>
+                <div class="empty-state" *ngIf="promotions.length === 0">No hay promociones registradas.</div>
+            </div>
+        </mat-tab>
+
+    </mat-tab-group>
+</div>

@@ -4,13 +4,9 @@
 # Java / Maven
 target/
 *.class
-.mvn/
-mvnw
-mvnw.cmd
+
 backend/target/
-backend/.mvn/
-backend/mvnw
-backend/mvnw.cmd
+
 *.zip
 *.tar.gz
 
@@ -30,4 +26,4 @@ frontend/.angular/
 # Archives
 Archive/
 Archive 2/
-MANUAL_TECNICO.md
+

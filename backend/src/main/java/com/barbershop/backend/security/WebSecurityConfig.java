@@ -86,7 +86,8 @@ public class WebSecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.setAllowedOriginPatterns(java.util.Arrays.asList("http://localhost:4200",
-                "https://barbershop-ashen-gamma.vercel.app", "https://*.vercel.app", "https://*.trycloudflare.com"));
+                "https://barbershop-ashen-gamma.vercel.app", "https://*.vercel.app", "https://*.trycloudflare.com",
+                "http://143.47.101.209"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
         configuration.setAllowCredentials(true);

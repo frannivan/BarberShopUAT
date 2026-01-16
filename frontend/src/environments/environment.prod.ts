@@ -4,6 +4,6 @@ export const environment = {
     // or we can just point to the Render URL here if we know it.
     // Ideally, use a placeholder or read from a config file.
     // For now, let's assume the user will update this or we provide the Render URL.
-    apiUrl: 'http://143.47.101.209/api',
+    apiUrl: 'https://143.47.101.209/api',
     tenantId: 'barbershop'
 };
